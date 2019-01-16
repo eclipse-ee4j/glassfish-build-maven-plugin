@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012, 2018 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2019 Payara Services Ltd.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -69,6 +70,12 @@ public final class ExecMojo extends AbstractMojo {
     @Parameter(property = "commandlineArgs")
     private String commandlineArgs;
 
+    /**
+     * Plugin should return failure if an error occurred.
+     */
+    @Parameter(property = "failOnError", defaultValue = "true")
+    private Boolean failOnError;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -94,6 +101,7 @@ public final class ExecMojo extends AbstractMojo {
         exec.setExecutable(executable);
         getLog().info("executable: " + executable);
         exec.createArg().setLine(commandlineArgs);
+        exec.setFailonerror(failOnError);
         getLog().info("commandLineArgs: " + commandlineArgs);
         exec.execute();
     }
