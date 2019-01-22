@@ -468,38 +468,18 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                 continue;
             }
 
-            boolean doCopy = copyTypesList.contains(
-                    dependency.getArtifact().getExtension());
-            boolean doUnpack = unpackTypesList.contains(
-                    dependency.getArtifact().getExtension());
+            // copy trumps unpack
+            if (copyTypesList.contains(
+                    dependency.getArtifact().getExtension())) {
 
-            if (doCopy && doUnpack) {
+                if (isArtifactExcluded(
+                        copyExcludesList, dependency.getArtifact())) {
 
-                boolean isUnpackExcluded = isArtifactExcluded(
-                        unpackExcludesList, dependency.getArtifact());
-                boolean isCopyExcluded = isArtifactExcluded(
-                        copyExcludesList, dependency.getArtifact());
-
-                if (isUnpackExcluded && isCopyExcluded) {
-                    // if both are included, do nothing
-                    getLog().warn("Excluded: "
+                    getLog().info("Excluded: "
                             + dependency.getArtifact().toString());
-                    doCopy = false;
-                    doUnpack = false;
-                } else if (isCopyExcluded && isUnpackExcluded) {
-                    // not excluded, copy trumps
-                    doCopy = true;
-                    doUnpack = false;
-                } else if (isCopyExcluded) {
-                    doCopy = false;
-                    doUnpack = true;
-                } else {
-                    doCopy = true;
-                    doUnpack = false;
+                    continue;
                 }
-            }
 
-            if (doCopy) {
                 String mapping = getMapping(dependency.getArtifact());
                 File destFile = new File(stageDirectory,
                         mapping + "."
@@ -513,15 +493,24 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                 } catch (IOException ex) {
                     getLog().error(ex.getMessage(), ex);
                 }
-            }
 
-            if (doUnpack) {
+            } else if (unpackTypesList.contains(
+                        dependency.getArtifact().getExtension())) {
+
+                if (isArtifactExcluded(
+                        unpackExcludesList, dependency.getArtifact())) {
+
+                    getLog().info("Excluded: "
+                            + dependency.getArtifact().toString());
+                    continue;
+                }
+
                 String mapping = getMapping(dependency.getArtifact());
                 File destDir = new File(stageDirectory, mapping);
                 String relativeDestDir = destDir.getPath()
                         .substring(project.getBasedir().getPath().length() + 1);
-                getLog().info("Unpacking " + dependency.getArtifact() + " to "
-                        + relativeDestDir);
+                getLog().info("Unpacking " + dependency.getArtifact()
+                        + " to " + relativeDestDir);
                 unpack(sourceFile, destDir, includes, excludes,
                         /* silent */ true, getLog(), archiverManager);
             }
