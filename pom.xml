@@ -64,15 +64,7 @@
       <developerConnection>scm:git:git://github.com/eclipse-ee4j/glassfish-build-maven-plugin.git</developerConnection>
       <url>https://github.com/eclipse-ee4j/glassfish-build-maven-plugin</url>
       <tag>HEAD</tag>
-  </scm>
-
-    <developers>
-      <developer>
-          <name>Roman Grigoriadi</name>
-          <organization>Oracle Corporation</organization>
-          <organizationUrl>http://www.oracle.com/</organizationUrl>
-      </developer>
-    </developers>
+    </scm>
 
     <properties>
         <maven.version>3.3.9</maven.version>
