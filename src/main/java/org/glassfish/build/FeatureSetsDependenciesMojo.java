@@ -113,9 +113,8 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     /**
      * Comma separated list of (g:)a(:v) to excludes for unpack.
      */
-    @Parameter(property = PROPERTY_PREFIX + "copyExcludes",
-            defaultValue = "")
-    private String copyExcludes;
+    @Parameter(property = PROPERTY_PREFIX + "copyExcludes")
+    private List<String> copyExcludes  = Collections.emptyList();
 
     /**
      * Comma separated list of file extensions to include for unpack.
@@ -127,9 +126,8 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     /**
      * Comma separated list of (g:)a(:v) to excludes for unpack.
      */
-    @Parameter(property = PROPERTY_PREFIX + "unpackExcludes",
-            defaultValue = "")
-    private String unpackExcludes;
+    @Parameter(property = PROPERTY_PREFIX + "unpackExcludes")
+    private List<String> unpackExcludes = Collections.emptyList();
 
     /**
      * Comma separated list of include patterns.
@@ -165,9 +163,8 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     /**
      * The groupId of the feature sets to include.
      */
-    @Parameter(property = PROPERTY_PREFIX + "featureset.groupid.includes",
-            defaultValue = "")
-    private String featureSetGroupIdIncludes;
+    @Parameter(property = PROPERTY_PREFIX + "featureset.groupid.includes")
+    private List<String> featureSetGroupIdIncludes = Collections.emptyList();
 
     /**
      * Custom mappings.
@@ -365,18 +362,14 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
 
         List<String> includeScopeList = stringAsList(includeScope, ",");
         List<String> excludeScopeList = stringAsList(excludeScope, ",");
-        List<String> featureSetGroupIdIncludesList = stringAsList(
-                featureSetGroupIdIncludes, ",");
         List<String> copyTypesList = stringAsList(copyTypes, ",");
         List<String> unpackTypesList = stringAsList(unpackTypes, ",");
-        List<String> unpackExcludesList = stringAsList(unpackExcludes, ",");
-        List<String> copyExcludesList = stringAsList(copyExcludes, ",");
 
         // get all direct featureset dependencies's direct dependencies
         final Set<Dependency> dependencies = new HashSet<Dependency>();
         for (org.apache.maven.artifact.Artifact artifact
                 : project.getArtifacts()) {
-            if (featureSetGroupIdIncludesList.contains(artifact.getGroupId())) {
+            if (featureSetGroupIdIncludes.contains(artifact.getGroupId())) {
                 ArtifactDescriptorRequest descriptorRequest =
                         new ArtifactDescriptorRequest();
                 descriptorRequest.setArtifact(
@@ -421,7 +414,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                 // if the dependency is a feature set
                 // or not of proper scope
                 // skip
-                if (featureSetGroupIdIncludesList.contains(
+                if (featureSetGroupIdIncludes.contains(
                         directDependency.getGroupId())
                     || !isScopeIncluded(directDependency.getScope())) {
                     continue;
@@ -473,7 +466,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                     dependency.getArtifact().getExtension())) {
 
                 if (isArtifactExcluded(
-                        copyExcludesList, dependency.getArtifact())) {
+                        copyExcludes, dependency.getArtifact())) {
 
                     getLog().info("Excluded: "
                             + dependency.getArtifact().toString());
@@ -498,7 +491,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                         dependency.getArtifact().getExtension())) {
 
                 if (isArtifactExcluded(
-                        unpackExcludesList, dependency.getArtifact())) {
+                        unpackExcludes, dependency.getArtifact())) {
 
                     getLog().info("Excluded: "
                             + dependency.getArtifact().toString());
