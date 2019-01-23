@@ -143,6 +143,7 @@
                     <configuration>
                         <scm>git</scm>
                         <scmOnly>true</scmOnly>
+                        <baseDirectory>${project.basedir}</baseDirectory>
                         <exclude>
                             <pattern>/LICENSE</pattern>
                             <pattern>/CONTRIBUTING.md</pattern>
@@ -187,6 +188,7 @@
                     <execution>
                         <goals>
                             <goal>copyright</goal>
+                            <goal>check</goal>
                         </goals>
                         <phase>verify</phase>
                     </execution>
