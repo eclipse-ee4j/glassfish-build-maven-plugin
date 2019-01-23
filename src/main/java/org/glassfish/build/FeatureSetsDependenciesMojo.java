@@ -113,9 +113,8 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     /**
      * Comma separated list of (g:)a(:v) to excludes for unpack.
      */
-    @Parameter(property = PROPERTY_PREFIX + "copyExcludes",
-            defaultValue = "")
-    private String copyExcludes;
+    @Parameter(property = PROPERTY_PREFIX + "copyExcludes")
+    private List<String> copyExcludes  = Collections.emptyList();
 
     /**
      * Comma separated list of file extensions to include for unpack.
@@ -127,9 +126,8 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     /**
      * Comma separated list of (g:)a(:v) to excludes for unpack.
      */
-    @Parameter(property = PROPERTY_PREFIX + "unpackExcludes",
-            defaultValue = "")
-    private String unpackExcludes;
+    @Parameter(property = PROPERTY_PREFIX + "unpackExcludes")
+    private List<String> unpackExcludes = Collections.emptyList();
 
     /**
      * Comma separated list of include patterns.
@@ -165,9 +163,8 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     /**
      * The groupId of the feature sets to include.
      */
-    @Parameter(property = PROPERTY_PREFIX + "featureset.groupid.includes",
-            defaultValue = "")
-    private String featureSetGroupIdIncludes;
+    @Parameter(property = PROPERTY_PREFIX + "featureset.groupid.includes")
+    private List<String> featureSetGroupIdIncludes = Collections.emptyList();
 
     /**
      * Custom mappings.
@@ -365,18 +362,14 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
 
         List<String> includeScopeList = stringAsList(includeScope, ",");
         List<String> excludeScopeList = stringAsList(excludeScope, ",");
-        List<String> featureSetGroupIdIncludesList = stringAsList(
-                featureSetGroupIdIncludes, ",");
         List<String> copyTypesList = stringAsList(copyTypes, ",");
         List<String> unpackTypesList = stringAsList(unpackTypes, ",");
-        List<String> unpackExcludesList = stringAsList(unpackExcludes, ",");
-        List<String> copyExcludesList = stringAsList(copyExcludes, ",");
 
         // get all direct featureset dependencies's direct dependencies
         final Set<Dependency> dependencies = new HashSet<Dependency>();
         for (org.apache.maven.artifact.Artifact artifact
                 : project.getArtifacts()) {
-            if (featureSetGroupIdIncludesList.contains(artifact.getGroupId())) {
+            if (featureSetGroupIdIncludes.contains(artifact.getGroupId())) {
                 ArtifactDescriptorRequest descriptorRequest =
                         new ArtifactDescriptorRequest();
                 descriptorRequest.setArtifact(
@@ -421,7 +414,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                 // if the dependency is a feature set
                 // or not of proper scope
                 // skip
-                if (featureSetGroupIdIncludesList.contains(
+                if (featureSetGroupIdIncludes.contains(
                         directDependency.getGroupId())
                     || !isScopeIncluded(directDependency.getScope())) {
                     continue;
@@ -468,38 +461,18 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                 continue;
             }
 
-            boolean doCopy = copyTypesList.contains(
-                    dependency.getArtifact().getExtension());
-            boolean doUnpack = unpackTypesList.contains(
-                    dependency.getArtifact().getExtension());
+            // copy trumps unpack
+            if (copyTypesList.contains(
+                    dependency.getArtifact().getExtension())) {
 
-            if (doCopy && doUnpack) {
+                if (isArtifactExcluded(
+                        copyExcludes, dependency.getArtifact())) {
 
-                boolean isUnpackExcluded = isArtifactExcluded(
-                        unpackExcludesList, dependency.getArtifact());
-                boolean isCopyExcluded = isArtifactExcluded(
-                        copyExcludesList, dependency.getArtifact());
-
-                if (isUnpackExcluded && isCopyExcluded) {
-                    // if both are included, do nothing
-                    getLog().warn("Excluded: "
+                    getLog().info("Excluded: "
                             + dependency.getArtifact().toString());
-                    doCopy = false;
-                    doUnpack = false;
-                } else if (isCopyExcluded && isUnpackExcluded) {
-                    // not excluded, copy trumps
-                    doCopy = true;
-                    doUnpack = false;
-                } else if (isCopyExcluded) {
-                    doCopy = false;
-                    doUnpack = true;
-                } else {
-                    doCopy = true;
-                    doUnpack = false;
+                    continue;
                 }
-            }
 
-            if (doCopy) {
                 String mapping = getMapping(dependency.getArtifact());
                 File destFile = new File(stageDirectory,
                         mapping + "."
@@ -513,15 +486,24 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                 } catch (IOException ex) {
                     getLog().error(ex.getMessage(), ex);
                 }
-            }
 
-            if (doUnpack) {
+            } else if (unpackTypesList.contains(
+                        dependency.getArtifact().getExtension())) {
+
+                if (isArtifactExcluded(
+                        unpackExcludes, dependency.getArtifact())) {
+
+                    getLog().info("Excluded: "
+                            + dependency.getArtifact().toString());
+                    continue;
+                }
+
                 String mapping = getMapping(dependency.getArtifact());
                 File destDir = new File(stageDirectory, mapping);
                 String relativeDestDir = destDir.getPath()
                         .substring(project.getBasedir().getPath().length() + 1);
-                getLog().info("Unpacking " + dependency.getArtifact() + " to "
-                        + relativeDestDir);
+                getLog().info("Unpacking " + dependency.getArtifact()
+                        + " to " + relativeDestDir);
                 unpack(sourceFile, destDir, includes, excludes,
                         /* silent */ true, getLog(), archiverManager);
             }

@@ -27,7 +27,7 @@
     </parent>
     <groupId>org.glassfish.build</groupId>
     <artifactId>glassfishbuild-maven-plugin</artifactId>
-    <version>3.2.28-SNAPSHOT</version>
+    <version>3.2.29-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>GlassFishBuild Maven Plugin</name>
 
@@ -139,7 +139,7 @@
                 <plugin>
                     <groupId>org.glassfish.copyright</groupId>
                     <artifactId>glassfish-copyright-maven-plugin</artifactId>
-                    <version>1.50</version>
+                    <version>2.0</version>
                     <configuration>
                         <scm>git</scm>
                         <scmOnly>true</scmOnly>
@@ -147,6 +147,7 @@
                             <pattern>/LICENSE</pattern>
                             <pattern>/CONTRIBUTING.md</pattern>
                             <pattern>/README.md</pattern>
+                            <pattern>/NOTICE.md</pattern>
                         </exclude>
                     </configuration>
                 </plugin>
