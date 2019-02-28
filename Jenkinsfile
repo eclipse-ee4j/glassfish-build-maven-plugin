@@ -21,8 +21,6 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '50'))
     // preserve the stashes to allow re-running a test stage
     preserveStashes()
-    // issue related to default 'implicit' checkout, disable it
-    skipDefaultCheckout()
     // abort pipeline if previous stage is unstable
     skipStagesAfterUnstable()
     // show timestamps in logs
@@ -70,8 +68,10 @@ spec:
     stage('build') {
       steps {
         container('build-container') {
-          sh 'mvn clean install -Pstaging'
-          junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
+          timeout(time: 10, unit: 'MINUTES') {
+            sh 'mvn clean install -Pstaging'
+            junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
+          }
         }
       }
     }
