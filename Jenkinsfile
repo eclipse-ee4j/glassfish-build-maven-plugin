@@ -39,6 +39,12 @@ metadata:
 spec:
   securityContext:
     runAsUser: 1000100000
+  volumes:
+    - name: maven-repo-shared-storage
+      persistentVolumeClaim:
+       claimName: glassfish-maven-repo-storage
+    - name: maven-repo-local-storage
+      emptyDir: {}
   containers:
   - name: jnlp
     image: jenkins/jnlp-slave:alpine
@@ -57,6 +63,12 @@ spec:
     - cat
     tty: true
     imagePullPolicy: Always
+    volumeMounts:
+        name: maven-settings
+      - mountPath: "/home/jenkins/.m2/repository"
+        name: maven-repo-shared-storage
+      - mountPath: "/home/jenkins/.m2/repository/org/glassfish/build"
+        name: maven-repo-local-storage
     resources:
       limits:
         memory: "7Gi"
