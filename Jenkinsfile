@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  */
 
-env.label = "pod-${UUID.randomUUID().toString()}"
+env.label = "ci-pod-${UUID.randomUUID().toString()}"
 pipeline {
   options {
     // keep at most 50 builds
