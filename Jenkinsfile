@@ -19,14 +19,12 @@ pipeline {
   options {
     // keep at most 50 builds
     buildDiscarder(logRotator(numToKeepStr: '50'))
-    // preserve the stashes to allow re-running a test stage
-    preserveStashes()
     // abort pipeline if previous stage is unstable
     skipStagesAfterUnstable()
     // show timestamps in logs
     timestamps()
     // global timeout, abort after 6 hours
-    timeout(time: 6, unit: 'HOURS')
+    timeout(time: 20, unit: 'MINUTES')
   }
   agent {
     kubernetes {
