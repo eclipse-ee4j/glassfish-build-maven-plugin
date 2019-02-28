@@ -64,7 +64,6 @@ spec:
     tty: true
     imagePullPolicy: Always
     volumeMounts:
-        name: maven-settings
       - mountPath: "/home/jenkins/.m2/repository"
         name: maven-repo-shared-storage
       - mountPath: "/home/jenkins/.m2/repository/org/glassfish/build"
