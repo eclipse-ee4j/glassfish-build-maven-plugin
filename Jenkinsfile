@@ -68,7 +68,7 @@ spec:
         memory: "1Gi"
         cpu: "1"
   - name: build-container
-    image: ee4jglassfish/ci:tini-jdk-8.181
+    image: pzlc/ee4j-gf-tini:1.0.1
     args:
     - cat
     tty: true
