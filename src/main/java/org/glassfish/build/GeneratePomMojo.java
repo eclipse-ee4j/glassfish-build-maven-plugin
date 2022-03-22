@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2018 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2022 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -255,19 +255,18 @@ public final class GeneratePomMojo extends AbstractMojo {
         File newPomFile = new File(outputDirectory, "pom.xml");
         newPomFile.getParentFile().mkdirs();
 
-        FileWriter fw = null;
-        try {
+        try (FileWriter fw = new FileWriter(newPomFile)) {
             // write comments from base pom
-            fw = new FileWriter(newPomFile);
-            String line;
-            BufferedReader br = new BufferedReader(new FileReader(pomFile));
-            while (true) {
-                line = br.readLine();
-                if (line == null || line.startsWith("<project")) {
-                    break;
+            try (BufferedReader br = new BufferedReader(new FileReader(pomFile))) {
+                String line;
+                while (true) {
+                    line = br.readLine();
+                    if (line == null || line.startsWith("<project")) {
+                        break;
+                    }
+                    fw.write(line);
+                    fw.write('\n');
                 }
-                fw.write(line);
-                fw.write('\n');
             }
 
             // write new pom and skip first line (xml header)
@@ -276,13 +275,6 @@ public final class GeneratePomMojo extends AbstractMojo {
             fw.write(pom.substring(ind));
         } catch (IOException ex) {
             throw new MojoExecutionException(ex.getMessage(), ex);
-        } finally {
-            try {
-                if (fw != null) {
-                    fw.close();
-                }
-            } catch (IOException ex) {
-            }
         }
 
         if (attach) {
