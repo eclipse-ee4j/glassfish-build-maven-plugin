@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2018 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2022 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Repository;
 import org.apache.maven.model.building.FileModelSource;
@@ -154,5 +155,13 @@ final class MavenModelResolver implements ModelResolver {
 
         return resolveModel(parent.getGroupId(), parent.getArtifactId(),
                 parent.getVersion());
+    }
+
+    @Override
+    public ModelSource resolveModel(final Dependency dependency)
+            throws UnresolvableModelException {
+
+        return resolveModel(dependency.getGroupId(), dependency.getArtifactId(),
+                dependency.getVersion());
     }
 }
