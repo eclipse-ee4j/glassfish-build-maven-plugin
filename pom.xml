@@ -191,6 +191,21 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-invoker-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>install</goal>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
