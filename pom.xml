@@ -143,6 +143,10 @@
                         </exclude>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <artifactId>maven-invoker-plugin</artifactId>
+                    <version>3.2.2</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
