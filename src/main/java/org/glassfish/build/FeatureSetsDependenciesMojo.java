@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2019 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, 2022 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -461,17 +462,9 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                 continue;
             }
 
-            // copy trumps unpack
-            if (copyTypesList.contains(
-                    dependency.getArtifact().getExtension())) {
-
-                if (isArtifactExcluded(
-                        copyExcludes, dependency.getArtifact())) {
-
-                    getLog().info("Excluded: "
-                            + dependency.getArtifact().toString());
-                    continue;
-                }
+            // copy trumps unpack,
+            // (but only if artifact is not excluded from copying already)
+            if (isArtifactActionable(dependency, copyTypesList, copyExcludes, getLog())) {
 
                 String mapping = getMapping(dependency.getArtifact());
                 File destFile = new File(stageDirectory,
@@ -487,16 +480,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                     getLog().error(ex.getMessage(), ex);
                 }
 
-            } else if (unpackTypesList.contains(
-                        dependency.getArtifact().getExtension())) {
-
-                if (isArtifactExcluded(
-                        unpackExcludes, dependency.getArtifact())) {
-
-                    getLog().info("Excluded: "
-                            + dependency.getArtifact().toString());
-                    continue;
-                }
+            } else if (isArtifactActionable(dependency, unpackTypesList, unpackExcludes, getLog())) {
 
                 String mapping = getMapping(dependency.getArtifact());
                 File destDir = new File(stageDirectory, mapping);
@@ -508,5 +492,19 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                         /* silent */ true, getLog(), archiverManager);
             }
         }
+    }
+
+    static boolean isArtifactActionable(final ArtifactResult dependency,
+                                        final List<String> actionTypesList,
+                                        final List<String> actionExcludes,
+                                        final Log log) {
+        boolean typeIncluded = actionTypesList.contains(dependency.getArtifact().getExtension());
+        boolean artifactExcluded = isArtifactExcluded(actionExcludes, dependency.getArtifact());
+
+        if (artifactExcluded) {
+            log.info("Excluded: " + dependency.getArtifact().toString());
+        }
+
+        return typeIncluded && !artifactExcluded;
     }
 }
