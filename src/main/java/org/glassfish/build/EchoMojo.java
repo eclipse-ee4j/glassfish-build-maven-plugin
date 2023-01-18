@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation. All rights reserved.
  * Copyright (c) 2008, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -25,7 +26,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 /**
  * Echo a message.
  */
-@Mojo(name = "echo")
+@Mojo(name = "echo", threadSafe = true)
 public final class EchoMojo extends AbstractMojo {
 
     /**
