@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2012, 2019 Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2019 Payara Services Ltd.
  *
@@ -29,12 +30,12 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-
 import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.ExecTask;
 import org.apache.tools.ant.taskdefs.condition.Os;
+import org.apache.tools.ant.types.Environment.Variable;
 
 /**
  * Execute a command.
@@ -102,8 +103,20 @@ public final class ExecMojo extends AbstractMojo {
         getLog().info("executable: " + executable);
         exec.createArg().setLine(commandlineArgs);
         exec.setFailonerror(failOnError);
+        String javaHome = System.getenv("JAVA_HOME");
+        if (javaHome != null) {
+            exec.addEnv(createVariable("AS_JAVA", javaHome));
+            exec.addEnv(createVariable("JAVA_HOME", javaHome));
+        }
         getLog().info("commandLineArgs: " + commandlineArgs);
         exec.execute();
+    }
+
+    private Variable createVariable(final String key, final String value) {
+        final Variable variable = new Variable();
+        variable.setKey(key);
+        variable.setValue(value);
+        return variable;
     }
 
     /**
