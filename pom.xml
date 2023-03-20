@@ -68,7 +68,7 @@
     </scm>
 
     <properties>
-        <maven.version>3.9.0</maven.version>
+        <maven.version>3.9.1</maven.version>
         <release.arguments />
     </properties>
 
