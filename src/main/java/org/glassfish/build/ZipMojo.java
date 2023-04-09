@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2018 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2023 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -17,10 +17,13 @@
 package org.glassfish.build;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.List;
 
+import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -120,6 +123,14 @@ public final class ZipMojo extends AbstractMojo {
             defaultValue = "true")
     private Boolean attach;
 
+    /**
+     * Timestamp for reproducible output archive entries, either formatted as ISO 8601
+     * <code>yyyy-MM-dd'T'HH:mm:ssXXX</code> or as an int representing seconds since the epoch (like
+     * <a href="https://reproducible-builds.org/docs/source-date-epoch/">SOURCE_DATE_EPOCH</a>).
+     */
+    @Parameter(defaultValue = "${project.build.outputTimestamp}")
+    private String outputTimestamp;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -132,9 +143,12 @@ public final class ZipMojo extends AbstractMojo {
             fsets.add(createZipFileSet(dir, includes, excludes));
         }
 
+        // configure for Reproducible Builds based on outputTimestamp value
+        Optional<Instant> timestamp = MavenArchiver.parseBuildOutputTimestamp(outputTimestamp);
+
         File target = createZip(project.getProperties(), getLog(),
                 duplicate, fsets, new File(outputDirectory,
-                        finalName + '.' + extension));
+                        finalName + '.' + extension), timestamp);
 
         if (attach) {
             project.getArtifact().setFile(target);

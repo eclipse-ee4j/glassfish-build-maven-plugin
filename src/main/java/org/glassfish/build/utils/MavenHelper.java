@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2018 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2023 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -20,12 +20,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
@@ -862,15 +864,17 @@ public final class MavenHelper {
      * @param fsets list of {@code ZipFileSet} that describe the resources to
      * zip
      * @param target the {@code File} instance for the zip file to create
+     * @param timestamp optional reproducible build timestamp
      * @return the target file
      */
     public static File createZip(final Properties props,
             final Log log,
             final String duplicate,
             final List<ZipFileSet> fsets,
-            final File target) {
+            final File target,
+            final Optional<Instant> timestamp) {
 
-        ZipHelper.getInstance().zip(props, log, duplicate, fsets, target);
+        ZipHelper.getInstance().zip(props, log, duplicate, fsets, target, timestamp);
         return target;
     }
 }

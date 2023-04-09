@@ -70,6 +70,7 @@
     <properties>
         <maven.version>3.9.1</maven.version>
         <release.arguments />
+        <project.build.outputTimestamp>2023-04-09T15:29:03Z</project.build.outputTimestamp>
     </properties>
 
     <build>
@@ -83,7 +84,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
                     <configuration>
                         <mavenExecutorId>forked-path</mavenExecutorId>
                         <useReleaseProfile>false</useReleaseProfile>
