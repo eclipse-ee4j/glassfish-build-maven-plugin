@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -17,9 +17,11 @@
 package org.glassfish.build.utils;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.apache.maven.plugin.logging.Log;
@@ -69,12 +71,14 @@ final class ZipHelper {
      * @param fsets list of {@code ZipFileSet} that describe the resources to
      * zip
      * @param target the {@code File} instance for the zip file to create
+     * @param timestamp optional reproducible build timestamp
      */
     void zip(final Properties properties,
             final Log mavenLog,
             final String duplicate,
             final List<ZipFileSet> fsets,
-            final File target) {
+            final File target,
+            final Optional<Instant> timestamp) {
 
         Project antProject = new Project();
         antProject.addBuildListener(new AntBuildListener(mavenLog));
@@ -91,6 +95,9 @@ final class ZipHelper {
         df.setValue(duplicate);
         zip.setDuplicate(df);
         mavenLog.info(String.format("[zip] duplicate: %s", duplicate));
+        if (timestamp.isPresent()) {
+            zip.setModificationtime(timestamp.get().toString());
+        }
 
         List<ZipFileSet> filesets;
         if (fsets == null) {
