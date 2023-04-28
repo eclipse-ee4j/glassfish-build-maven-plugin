@@ -39,7 +39,7 @@ import org.glassfish.hk2.api.ProxyCtl;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.jvnet.hk2.annotations.Service;
 import org.jvnet.hk2.config.api.ConfigurationUtilities;
-import org.jvnet.tiger_types.Types;
+import org.jvnet.hk2.config.tiger.Types;
 
 /**
   * <p>

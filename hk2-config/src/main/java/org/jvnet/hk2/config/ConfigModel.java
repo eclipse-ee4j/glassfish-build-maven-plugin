@@ -39,7 +39,7 @@ import org.glassfish.hk2.api.MultiException;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.HK2LoaderImpl;
 import org.glassfish.hk2.utilities.ServiceLocatorUtilities;
-import org.jvnet.tiger_types.Types;
+import org.jvnet.hk2.config.tiger.Types;
 
 /**
  * Describes the configuration model for a particular class (called "target type" in this class.)
