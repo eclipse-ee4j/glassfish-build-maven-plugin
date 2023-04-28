@@ -122,7 +122,6 @@
           <lifecycle>
             <id>default</id>
             <phases>
-              <generate-sources>org.glassfish.build:glassfishbuild-maven-plugin:generate-injectors</generate-sources>
               <process-resources>org.apache.maven.plugins:maven-resources-plugin:resources</process-resources>
               <compile>org.apache.maven.plugins:maven-compiler-plugin:compile</compile>
               <process-classes>
@@ -131,7 +130,6 @@
                   org.apache.felix:maven-bundle-plugin:manifest,
                   org.glassfish.build:command-security-maven-plugin:check
               </process-classes>
-              <generate-test-sources>org.glassfish.build:glassfishbuild-maven-plugin:generate-test-injectors</generate-test-sources>
               <process-test-resources>org.apache.maven.plugins:maven-resources-plugin:testResources</process-test-resources>
               <test-compile>org.apache.maven.plugins:maven-compiler-plugin:testCompile</test-compile>
               <process-test-classes>org.glassfish.hk2:hk2-inhabitant-generator:generate-test-inhabitants</process-test-classes>
@@ -168,7 +166,6 @@
           <lifecycle>
             <id>default</id>
             <phases>
-              <generate-sources>org.glassfish.build:glassfishbuild-maven-plugin:generate-injectors</generate-sources>
               <process-resources>org.apache.maven.plugins:maven-resources-plugin:resources</process-resources>
               <compile>org.apache.maven.plugins:maven-compiler-plugin:compile</compile>
               <process-classes>
@@ -177,7 +174,6 @@
                   org.apache.felix:maven-bundle-plugin:manifest,
                   org.glassfish.build:command-security-maven-plugin:check
               </process-classes>
-              <generate-test-sources>org.glassfish.build:glassfishbuild-maven-plugin:generate-test-injectors</generate-test-sources>
               <process-test-resources>org.apache.maven.plugins:maven-resources-plugin:testResources</process-test-resources>
               <test-compile>org.apache.maven.plugins:maven-compiler-plugin:testCompile</test-compile>
               <process-test-classes>org.glassfish.hk2:hk2-inhabitant-generator:generate-test-inhabitants</process-test-classes>
