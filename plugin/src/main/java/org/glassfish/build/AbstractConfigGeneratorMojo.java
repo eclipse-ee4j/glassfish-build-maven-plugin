@@ -18,18 +18,22 @@
 package org.glassfish.build;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
+import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -45,19 +49,9 @@ import org.glassfish.build.hk2.config.generator.ConfigInjectorGenerator;
  * Abstract Mojo for config generator
  */
 public abstract class AbstractConfigGeneratorMojo extends AbstractMojo {
-    protected final static String GENERATED_SOURCES = "generated-sources/hk2-config-generator/src";
-    protected final static String MAIN_NAME = "main";
-    protected final static String TEST_NAME = "test";
-    protected final static String JAVA_NAME = "java";
 
-    /**
-     * The maven project.
-     */
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     protected MavenProject project;
-
-    @Parameter
-    private boolean verbose;
 
     @Parameter(property = "supportedProjectTypes", defaultValue = "jar,glassfish-jar")
     private String supportedProjectTypes;
@@ -68,121 +62,107 @@ public abstract class AbstractConfigGeneratorMojo extends AbstractMojo {
     @Parameter(property="excludes", defaultValue = "")
     private String excludes;
 
-    protected abstract File getSourceDirectory();
+    protected abstract List<String> getCompileSourceRoots();
+
     protected abstract File getGeneratedDirectory();
-    protected abstract File getOutputDirectory();
+
+    /** Make the generated source directory visible for compilation */
     protected abstract void addCompileSourceRoot(String path);
 
-    private void internalExecute() throws Exception {
-        List<String> projectTypes = Arrays.asList(supportedProjectTypes.split(","));
-        if(!projectTypes.contains(project.getPackaging())
-                || !getSourceDirectory().exists()
-                || !getSourceDirectory().isDirectory()){
-            return;
-        }
-        getLog().info(getGeneratedDirectory().getAbsolutePath());
-        if (!getGeneratedDirectory().exists()) {
-            if (!getGeneratedDirectory().mkdirs()) {
-                getLog().info("Could not create output directory " +
-                        getOutputDirectory().getAbsolutePath());
-                return;
-            }
-        }
-        if (!getGeneratedDirectory().exists()) {
-            getLog().info("Exiting hk2-config-generator because could not find generated directory " +
-                  getGeneratedDirectory().getAbsolutePath());
-            return;
-        }
-        String outputPath = getGeneratedDirectory().getAbsolutePath();
 
-        // prepare command line arguments
-        List<String> options = new ArrayList<>();
-        options.add("-proc:only");
-        options.add("-s");
-        options.add(outputPath);
-        options.add("-d");
-        options.add(outputPath);
-        options.add("-cp");
-        options.add(getBuildClasspath());
-        List<String> classNames = new ArrayList<>();
-        classNames.addAll(FileUtils.getFileNames(getSourceDirectory(), includes, excludes,true));
+    protected abstract boolean skip();
 
-        if(classNames.isEmpty()){
-            getLog().info("No source file");
-            return;
-        }
-
-        if(verbose){
-            getLog().info("");
-            getLog().info("-- AnnotationProcessing Command Line --");
-            getLog().info("");
-            getLog().info(options.toString());
-            getLog().info(classNames.toString());
-            getLog().info("");
-        }
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
-        Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromStrings(classNames);
-        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnostics, options, null, compilationUnits);
-        task.setProcessors(Collections.singleton(new ConfigInjectorGenerator()));
-
-        boolean compilationResult = task.call();
-        if(verbose) {
-            getLog().info("Result: " + (compilationResult ? "OK" : "!!! failed !!!"));
-        }
-
-        // make the generated source directory visible for compilation
-        addCompileSourceRoot(outputPath);
-        if (getLog().isInfoEnabled()) {
-            getLog().info("Source directory: " + outputPath + " added.");
-        }
-    }
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip()) {
+            getLog().info("Skipped.");
+            return;
+        }
         try {
             internalExecute();
-        } catch (Exception th) {
-            if (th instanceof MojoExecutionException) {
-                throw (MojoExecutionException) th;
-            }
-            if (th instanceof MojoFailureException) {
-                throw (MojoFailureException) th;
-            }
-
-            Throwable cause = th;
-            int lcv = 0;
-            while (cause != null) {
-                getLog().error("Exception from hk2-config-generator[" + lcv++ + "]=" + cause.getMessage());
-                cause.printStackTrace();
-
-                cause = cause.getCause();
-            }
-
+        } catch (IOException th) {
             throw new MojoExecutionException(th.getMessage(), th);
         }
     }
 
+
+    private void internalExecute() throws IOException, MojoExecutionException {
+        List<String> projectTypes = Arrays.asList(supportedProjectTypes.split(","));
+        if (!projectTypes.contains(project.getPackaging())) {
+            getLog().debug("Project type " + project.getPackaging() + " is not configured to use this plugin.");
+            return;
+        }
+        if (!getGeneratedDirectory().exists() && !getGeneratedDirectory().mkdirs()) {
+            throw new IOException("Could not create the directory " + getGeneratedDirectory().getAbsolutePath());
+        }
+
+        List<String> fileNames = new ArrayList<>();
+        for (String path : getCompileSourceRoots()) {
+            File directory = new File(path);
+            if (directory.exists()) {
+                fileNames.addAll(FileUtils.getFileNames(directory, includes, excludes, true));
+            }
+        }
+        if (fileNames.isEmpty()) {
+            getLog().info("No sources, nothing to generate.");
+            return;
+        }
+
+        List<String> options = new ArrayList<>();
+        options.add("-proc:only");
+        if (getLog().isDebugEnabled()) {
+            options.add("-verbose");
+        }
+        options.add("-s");
+        options.add(getGeneratedDirectory().getAbsolutePath());
+        options.add("-cp");
+        options.add(getBuildClasspath());
+        getLog().info("Generating to " + getGeneratedDirectory());
+
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("-- AnnotationProcessing Command Line --");
+            getLog().debug(options.toString());
+            getLog().debug(fileNames.toString());
+        }
+        StringBuilderWriter logs = getLog().isDebugEnabled() ? new StringBuilderWriter() : null;
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+        StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
+        Iterable<? extends JavaFileObject> files = fileManager.getJavaFileObjectsFromStrings(fileNames);
+        JavaCompiler.CompilationTask task = compiler.getTask(logs, fileManager, diagnostics, options, null, files);
+        task.setProcessors(Collections.singleton(new ConfigInjectorGenerator()));
+
+        boolean compilationResult = task.call();
+        if (!compilationResult) {
+            if (logs != null) {
+                // All info we have from the compiler
+                getLog().debug(logs.toString());
+            }
+            // Just errors
+            for (Diagnostic<? extends JavaFileObject> diag : diagnostics.getDiagnostics()) {
+                getLog().error(diag.getMessage(Locale.getDefault()));
+            }
+            throw new MojoExecutionException("Annotation processing failed, sources were NOT generated!");
+        }
+
+        addCompileSourceRoot(getGeneratedDirectory().getAbsolutePath());
+        if (getLog().isDebugEnabled()) {
+            getLog().debug(
+                "Sources generated in the directory " + getGeneratedDirectory() + " were registered to compilation.");
+        }
+    }
+
+
     private String getBuildClasspath() {
         StringBuilder sb = new StringBuilder();
-
         sb.append(project.getBuild().getOutputDirectory());
         sb.append(File.pathSeparator);
 
-        if (!getOutputDirectory().getAbsolutePath().equals(
-                project.getBuild().getOutputDirectory())) {
-
-            sb.append(getOutputDirectory().getAbsolutePath());
-            sb.append(File.pathSeparator);
-        }
-
         List<Artifact> artList = new ArrayList<>(project.getArtifacts());
         Iterator<Artifact> i = artList.iterator();
-
         if (i.hasNext()) {
             sb.append(i.next().getFile().getPath());
-
             while (i.hasNext()) {
                 sb.append(File.pathSeparator);
                 sb.append(i.next().getFile().getPath());
@@ -190,12 +170,9 @@ public abstract class AbstractConfigGeneratorMojo extends AbstractMojo {
         }
 
         String classpath = sb.toString();
-        if(verbose){
-            getLog().info("");
-            getLog().info("-- Classpath --");
-            getLog().info("");
-            getLog().info(classpath);
-            getLog().info("");
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("-- Classpath --");
+            getLog().debug(classpath);
         }
         return classpath;
     }

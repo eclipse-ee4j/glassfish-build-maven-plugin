@@ -18,6 +18,8 @@
 package org.glassfish.build;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -31,40 +33,34 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
     threadSafe = true)
 public class ConfigGeneratorMojo extends AbstractConfigGeneratorMojo {
 
-    private static final String generatedDirectory;
-    static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(GENERATED_SOURCES).append(File.separatorChar).append(MAIN_NAME).append(File.separatorChar).append(JAVA_NAME);
-        generatedDirectory = sb.toString();
-    }
+    private static final Path GENERATED_DIR = Path.of("generated-sources", "hk2-config-generator");
 
     @Parameter(property="project.build.outputDirectory")
     private File outputDirectory;
 
-    @Parameter(property="project.build.sourceDirectory")
-    private File sourceDirectory;
-
+    @Parameter(property = "glassfish.generate-injectors.skip", defaultValue = "false")
+    private boolean skip;
 
     @Override
-    protected File getSourceDirectory() {
-        return sourceDirectory;
+    protected List<String> getCompileSourceRoots() {
+        return project.getCompileSourceRoots();
     }
 
 
     @Override
     protected File getGeneratedDirectory() {
-        return new File(project.getBuild().getDirectory(), generatedDirectory);
-    }
-
-
-    @Override
-    protected File getOutputDirectory() {
-        return outputDirectory;
+        return new File(project.getBuild().getDirectory()).toPath().resolve(GENERATED_DIR).toFile();
     }
 
 
     @Override
     protected void addCompileSourceRoot(String path) {
         project.addCompileSourceRoot(path);
+    }
+
+
+    @Override
+    protected boolean skip() {
+        return skip;
     }
 }

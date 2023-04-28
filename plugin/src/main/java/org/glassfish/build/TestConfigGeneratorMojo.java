@@ -18,6 +18,8 @@
 package org.glassfish.build;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -31,39 +33,34 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
     threadSafe = true)
 public class TestConfigGeneratorMojo extends AbstractConfigGeneratorMojo {
 
-    static {
-        StringBuilder sb = new StringBuilder();
-        sb.append(GENERATED_SOURCES).append(File.separatorChar).append(TEST_NAME).append(File.separatorChar).append(JAVA_NAME);
-        generatedDirectory = sb.toString();
-    }
-
-    private static String generatedDirectory;
+    private static final Path GENERATED_DIR = Path.of("generated-test-sources", "hk2-config-generator");
 
     @Parameter(property="project.build.testOutputDirectory")
     private File outputDirectory;
 
-    @Parameter(property="project.build.testSourceDirectory")
-    private File sourceDirectory;
-
+    @Parameter(property = "glassfish.generate-test-injectors.skip", defaultValue = "false")
+    private Boolean skip;
 
     @Override
-    protected File getSourceDirectory() {
-        return sourceDirectory;
+    protected List<String> getCompileSourceRoots() {
+        return project.getTestCompileSourceRoots();
     }
 
 
     @Override
     protected File getGeneratedDirectory() {
-        return new File(project.getBuild().getDirectory(), generatedDirectory);
+        return new File(project.getBuild().getDirectory()).toPath().resolve(GENERATED_DIR).toFile();
     }
 
-    @Override
-    protected File getOutputDirectory() {
-        return outputDirectory;
-    }
 
     @Override
     protected void addCompileSourceRoot(String path) {
         project.addTestCompileSourceRoot(path);
+    }
+
+
+    @Override
+    protected boolean skip() {
+        return skip;
     }
 }
