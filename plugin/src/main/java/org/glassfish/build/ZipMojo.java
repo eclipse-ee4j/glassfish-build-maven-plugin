@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2012, 2023 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -20,8 +21,8 @@ import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.maven.archiver.MavenArchiver;
 import org.apache.maven.artifact.handler.ArtifactHandler;
@@ -33,7 +34,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-
 import org.apache.tools.ant.types.ZipFileSet;
 
 import static org.glassfish.build.utils.MavenHelper.createZip;
@@ -139,7 +139,7 @@ public final class ZipMojo extends AbstractMojo {
         if (filesets != null && filesets.length > 0) {
             fsets = Arrays.asList(filesets);
         } else {
-            fsets = new ArrayList<ZipFileSet>();
+            fsets = new ArrayList<>();
             fsets.add(createZipFileSet(dir, includes, excludes));
         }
 

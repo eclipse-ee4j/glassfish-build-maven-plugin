@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -16,14 +17,14 @@
 
 package org.jvnet.hk2.config;
 
+import javax.xml.stream.XMLStreamReader;
+
 import org.glassfish.hk2.api.ServiceLocator;
 import org.jvnet.hk2.annotations.Contract;
-
-import javax.xml.stream.XMLStreamReader;
 
 @Contract
 public interface DomDecorator<T extends Dom> {
 
-    public Dom decorate(ServiceLocator habitat, DomDocument document, T parent, ConfigModel model, XMLStreamReader in);
+    Dom decorate(ServiceLocator habitat, DomDocument document, T parent, ConfigModel model, XMLStreamReader in);
 
 }

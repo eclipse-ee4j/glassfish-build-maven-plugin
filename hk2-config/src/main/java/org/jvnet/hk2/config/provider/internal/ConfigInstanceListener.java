@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2012, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -16,9 +17,9 @@
 
 package org.jvnet.hk2.config.provider.internal;
 
-import java.util.Map;
-
 import jakarta.inject.Singleton;
+
+import java.util.Map;
 
 import org.glassfish.hk2.api.Filter;
 import org.glassfish.hk2.api.Injectee;
@@ -58,16 +59,22 @@ public class ConfigInstanceListener implements InstanceLifecycleListener {
         }
 
         Map<Injectee, Object> injectees = lifecycleEvent.getKnownInjectees();
-        if (injectees == null) return;
+        if (injectees == null) {
+            return;
+        }
 
         ConfigListener listener = (ConfigListener) lifecycleEvent.getLifecycleObject();
         for (Object injectee : injectees.values()) {
-            if (!(injectee instanceof ConfigBeanProxy)) continue;
+            if (!(injectee instanceof ConfigBeanProxy)) {
+                continue;
+            }
 
             ConfigBeanProxy configBeanProxy = (ConfigBeanProxy) injectee;
             Object impl = ConfigSupport.getImpl(configBeanProxy);
 
-            if (!(impl instanceof ObservableBean)) continue;
+            if (!(impl instanceof ObservableBean)) {
+                continue;
+            }
 
             ObservableBean ob = (ObservableBean) impl;
 

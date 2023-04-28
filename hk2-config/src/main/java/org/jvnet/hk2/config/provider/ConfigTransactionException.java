@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 1997, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -22,7 +23,6 @@ import org.glassfish.hk2.api.HK2RuntimeException;
  * A generic Transaction failure.
  *
  * @see ConfigTransactionRejectedException
- *
  * @author Jeff Trent
  */
 public class ConfigTransactionException extends HK2RuntimeException {
@@ -32,12 +32,13 @@ public class ConfigTransactionException extends HK2RuntimeException {
      */
     private static final long serialVersionUID = -5359924169380254813L;
 
-  public ConfigTransactionException(String message) {
-    super(message);
-  }
+    public ConfigTransactionException(String message) {
+        super(message);
+    }
 
-  public ConfigTransactionException(String message, Throwable cause) {
-    super(message, cause);
-  }
+
+    public ConfigTransactionException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

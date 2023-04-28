@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2012, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -24,7 +25,7 @@ import java.security.AccessController;
  *
  */
 public class ConfigThreadContext {
-    private static final ThreadLocal<ConfigThreadContext> tlc = new ThreadLocal<ConfigThreadContext>();
+    private static final ThreadLocal<ConfigThreadContext> tlc = new ThreadLocal<>();
 
     private AccessControlContext acc;
 

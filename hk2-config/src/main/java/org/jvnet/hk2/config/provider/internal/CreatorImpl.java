@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2012, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -20,27 +21,17 @@ import org.glassfish.hk2.api.ServiceLocator;
 
 /**
  * @author jwells
- *
  */
 public class CreatorImpl<T> implements Creator<T> {
     private final Class<?> c;
     private final ServiceLocator locator;
 
-    /**
-     *
-     * @param c
-     * @param locator
-     * @param metadata
-     * @param d
-     */
     public CreatorImpl(Class<?> c, ServiceLocator locator) {
         this.c = c;
         this.locator = locator;
     }
 
-    /* (non-Javadoc)
-     * @see org.jvnet.hk2.component.Creator#create(org.jvnet.hk2.component.Inhabitant)
-     */
+
     @SuppressWarnings("unchecked")
     @Override
     public T create() {

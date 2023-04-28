@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2013, 2022 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -31,14 +32,13 @@ import org.apache.maven.model.resolution.InvalidRepositoryException;
 import org.apache.maven.model.resolution.ModelResolver;
 import org.apache.maven.model.resolution.UnresolvableModelException;
 import org.apache.maven.repository.internal.ArtifactDescriptorUtils;
-
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.eclipse.aether.artifact.DefaultArtifact;
 
 /**
  * A model resolver that can resolve remote artifacts during model resolution.
@@ -77,8 +77,8 @@ final class MavenModelResolver implements ModelResolver {
 
         this.system = repoSystem;
         this.session = repoSession;
-        this.repositories = new ArrayList<RemoteRepository>(remoteRepos);
-        this.repositoryIds = new HashSet<String>();
+        this.repositories = new ArrayList<>(remoteRepos);
+        this.repositoryIds = new HashSet<>();
         for (RemoteRepository repository : repositories) {
             repositoryIds.add(repository.getId());
         }
@@ -91,8 +91,8 @@ final class MavenModelResolver implements ModelResolver {
     private MavenModelResolver(final MavenModelResolver clone) {
         this.system = clone.system;
         this.session = clone.session;
-        this.repositories = new ArrayList<RemoteRepository>(clone.repositories);
-        this.repositoryIds = new HashSet<String>(clone.repositoryIds);
+        this.repositories = new ArrayList<>(clone.repositories);
+        this.repositoryIds = new HashSet<>(clone.repositoryIds);
     }
 
     @Override

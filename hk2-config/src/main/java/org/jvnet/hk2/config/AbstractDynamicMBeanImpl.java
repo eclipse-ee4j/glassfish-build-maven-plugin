@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2007, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -16,14 +17,13 @@
 
 package org.jvnet.hk2.config;
 
+import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
+import javax.management.DynamicMBean;
+import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.ReflectionException;
-import javax.management.Attribute;
-import javax.management.InvalidAttributeValueException;
-import javax.management.DynamicMBean;
-import java.util.List;
 
 /**
  * Partial implementation of {@link DynamicMBean}.
@@ -31,6 +31,8 @@ import java.util.List;
  * @author Kohsuke Kawaguchi
  */
 abstract class AbstractDynamicMBeanImpl implements DynamicMBean {
+
+    @Override
     public final AttributeList getAttributes(String[] attributes) {
         AttributeList r = new AttributeList(attributes.length);
         for (String name : attributes) {
@@ -49,6 +51,7 @@ abstract class AbstractDynamicMBeanImpl implements DynamicMBean {
         return r;
     }
 
+    @Override
     public final AttributeList setAttributes(AttributeList attributes) {
         AttributeList r = new AttributeList(attributes.size());
         for (Object a : attributes) {

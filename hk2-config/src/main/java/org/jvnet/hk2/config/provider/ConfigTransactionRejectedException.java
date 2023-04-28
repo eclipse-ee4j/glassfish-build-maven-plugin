@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 1997, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -15,6 +16,8 @@
  */
 
 package org.jvnet.hk2.config.provider;
+
+import org.jvnet.hk2.config.ConfiguredBy;
 
 /**
  * Thrown by {@link ConfiguredBy} services that signifies that

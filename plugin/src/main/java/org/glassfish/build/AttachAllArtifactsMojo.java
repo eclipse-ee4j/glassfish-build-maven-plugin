@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2013, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -17,7 +18,6 @@
 package org.glassfish.build;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
@@ -116,8 +116,8 @@ public final class AttachAllArtifactsMojo extends AbstractMojo {
         // set model
         project.setFile(pomFile);
 
-        for (Iterator i = attachedArtifacts.iterator(); i.hasNext();) {
-            project.addAttachedArtifact((Artifact) i.next());
+        for (Object attachedArtifact : attachedArtifacts) {
+            project.addAttachedArtifact((Artifact) attachedArtifact);
         }
     }
 }

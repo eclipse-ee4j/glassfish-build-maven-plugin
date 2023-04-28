@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -16,19 +17,15 @@
 
 package org.jvnet.hk2.config;
 
-import org.glassfish.hk2.api.Descriptor;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
+
 import org.glassfish.hk2.api.DescriptorType;
 import org.glassfish.hk2.api.DescriptorVisibility;
 import org.glassfish.hk2.api.ServiceHandle;
 import org.glassfish.hk2.utilities.AbstractActiveDescriptor;
 import org.jvnet.hk2.config.provider.internal.Creator;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -81,7 +78,9 @@ public class DomDescriptor<T>
                 null,
                 null);
         super.addAdvertisedContract(ConfigBeanProxy.class.getName());
-        if (theDom == null) throw new IllegalArgumentException();
+        if (theDom == null) {
+            throw new IllegalArgumentException();
+        }
 
         this.theDom = theDom;
         setImplementation(theDom.getClass().getName());
@@ -143,6 +142,7 @@ public class DomDescriptor<T>
         return false;
     }
 
+    @Override
     public int hashCode() {
         return System.identityHashCode(this);
     }

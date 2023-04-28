@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2007, 2020 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -16,26 +17,24 @@
 
 package org.jvnet.hk2.config;
 
-import org.glassfish.hk2.api.ServiceLocator;
-import org.jvnet.hk2.config.Dom.Child;
-
-import jakarta.validation.constraints.NotNull;
-import javax.xml.stream.XMLInputFactory;
-import static javax.xml.stream.XMLStreamConstants.*;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.events.XMLEvent;
-import javax.xml.transform.stream.StreamSource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.stream.StreamSource;
+
+import org.glassfish.hk2.api.ServiceLocator;
+import org.jvnet.hk2.config.Dom.Child;
+
+import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
+import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 /**
  * Parses configuration files, builds {@link Inhabitant}s,
@@ -200,14 +199,16 @@ public class ConfigParser {
             String name = in.getLocalName();
             ConfigModel.Property a = model.elements.get(name);
 
-            if(children==null)
-                children = new ArrayList<Child>();
+            if(children==null) {
+                children = new ArrayList<>();
+            }
 
             if(a==null) {
                 // global look up
                 Dom child = handleElement(in, document, dom);
-                if(child!=null)
+                if(child!=null) {
                     children.add(new Dom.NodeChild(name, child));
+                }
             } else
             if(a.isLeaf()) {
                 children.add(new Dom.LeafChild(name,in.getElementText()));
@@ -218,12 +219,13 @@ public class ConfigParser {
         }
 
         if (children==null) {
-            children = new ArrayList<Dom.Child>();
+            children = new ArrayList<>();
         }
         dom.ensureConstraints(children);
 
-        if(!children.isEmpty())
+        if(!children.isEmpty()) {
             dom.setChildren(children);
+        }
 
         dom.register();
 

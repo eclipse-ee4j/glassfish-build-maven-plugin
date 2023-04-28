@@ -148,6 +148,7 @@
                             <pattern>/CONTRIBUTING.md</pattern>
                             <pattern>/README.md</pattern>
                             <pattern>/NOTICE.md</pattern>
+                            <pattern>/javax.annotation.processing.Processor</pattern>
                         </exclude>
                     </configuration>
                 </plugin>

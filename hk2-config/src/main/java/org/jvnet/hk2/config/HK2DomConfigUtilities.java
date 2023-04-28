@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2015, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -115,7 +116,9 @@ public class HK2DomConfigUtilities {
 
     private static boolean addIfNotThere(ServiceLocator locator, DynamicConfiguration config, DescriptorImpl desc, HK2Loader loader) {
         IndexedFilter filter = BuilderHelper.createContractFilter(desc.getImplementation());
-        if (locator.getBestDescriptor(filter) != null) return false;
+        if (locator.getBestDescriptor(filter) != null) {
+            return false;
+        }
 
         if (loader != null) {
             desc.setLoader(loader);

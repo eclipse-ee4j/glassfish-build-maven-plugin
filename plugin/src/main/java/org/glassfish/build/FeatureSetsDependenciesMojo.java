@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2017, 2022 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -115,7 +116,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
      * Comma separated list of (g:)a(:v) to excludes for unpack.
      */
     @Parameter(property = PROPERTY_PREFIX + "copyExcludes")
-    private List<String> copyExcludes  = Collections.emptyList();
+    private final List<String> copyExcludes  = Collections.emptyList();
 
     /**
      * Comma separated list of file extensions to include for unpack.
@@ -128,7 +129,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
      * Comma separated list of (g:)a(:v) to excludes for unpack.
      */
     @Parameter(property = PROPERTY_PREFIX + "unpackExcludes")
-    private List<String> unpackExcludes = Collections.emptyList();
+    private final List<String> unpackExcludes = Collections.emptyList();
 
     /**
      * Comma separated list of include patterns.
@@ -165,7 +166,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
      * The groupId of the feature sets to include.
      */
     @Parameter(property = PROPERTY_PREFIX + "featureset.groupid.includes")
-    private List<String> featureSetGroupIdIncludes = Collections.emptyList();
+    private final List<String> featureSetGroupIdIncludes = Collections.emptyList();
 
     /**
      * Custom mappings.
@@ -367,7 +368,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
         List<String> unpackTypesList = stringAsList(unpackTypes, ",");
 
         // get all direct featureset dependencies's direct dependencies
-        final Set<Dependency> dependencies = new HashSet<Dependency>();
+        final Set<Dependency> dependencies = new HashSet<>();
         for (org.apache.maven.artifact.Artifact artifact
                 : project.getArtifacts()) {
             if (featureSetGroupIdIncludes.contains(artifact.getGroupId())) {
@@ -394,7 +395,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
 
         // build a request to resolve all dependencies
         Set<ArtifactRequest> dependenciesRequest =
-                new HashSet<ArtifactRequest>();
+                new HashSet<>();
         for (Dependency dependency : dependencies) {
             String depScope = dependency.getScope();
             if (includeScopeList.contains(depScope)

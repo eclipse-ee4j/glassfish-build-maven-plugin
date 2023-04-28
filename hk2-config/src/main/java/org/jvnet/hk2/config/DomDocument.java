@@ -17,6 +17,22 @@
 
 package org.jvnet.hk2.config;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+
 import org.glassfish.hk2.api.ActiveDescriptor;
 import org.glassfish.hk2.api.Descriptor;
 import org.glassfish.hk2.api.IndexedFilter;
@@ -24,11 +40,6 @@ import org.glassfish.hk2.api.ServiceHandle;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.BuilderHelper;
 import org.jvnet.hk2.component.MultiMap;
-
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.XMLStreamException;
-import java.util.*;
 
 /**
  * Represents a whole DOM tree.
@@ -45,21 +56,21 @@ public class DomDocument<T extends Dom> {
      */
     private volatile Translator translator = Translator.NOOP;
 
-    protected final Map<ActiveDescriptor<? extends ConfigInjector>,ConfigModel> models = new HashMap<ActiveDescriptor<? extends ConfigInjector>, ConfigModel>();
-    private final MultiMap<Class, List<ConfigModel>> implementorsOf = new MultiMap<Class, List<ConfigModel>>();
+    protected final Map<ActiveDescriptor<? extends ConfigInjector>,ConfigModel> models = new HashMap<>();
+    private final MultiMap<Class, List<ConfigModel>> implementorsOf = new MultiMap<>();
 
     /*package*/ final ServiceLocator habitat;
 
     /*package*/ T root;
 
-    private DomDecorator decorator;
+    private final DomDecorator decorator;
 
-    private final Map<String, DataType> validators = new HashMap<String, DataType>();
+    private final Map<String, DataType> validators = new HashMap<>();
 
     /*package*/ static final List<String> PRIMS = Collections.unmodifiableList(Arrays.asList(
     "boolean", "char", "long", "int", "java.lang.Boolean", "java.lang.Character", "java.lang.Long", "java.lang.Integer"));
 
-    private final Map<String, ActiveDescriptor<? extends ConfigInjector<?>>> cache = new HashMap<String, ActiveDescriptor<? extends ConfigInjector<?>>>();
+    private final Map<String, ActiveDescriptor<? extends ConfigInjector<?>>> cache = new HashMap<>();
 
     public DomDocument(ServiceLocator habitat) {
         this.habitat = habitat;
@@ -87,8 +98,9 @@ public class DomDocument<T extends Dom> {
      */
     /*package*/ ConfigModel buildModel(ActiveDescriptor<? extends ConfigInjector> i) {
         ConfigModel m = models.get(i);
-        if(m==null)
+        if(m==null) {
             m = new ConfigModel(this, i, i.getMetadata(), habitat);
+        }
         return m;
     }
 
@@ -135,7 +147,9 @@ public class DomDocument<T extends Dom> {
     public ConfigModel getModelByElementName(String elementName) {
         ActiveDescriptor<?> i = habitat.getBestDescriptor(
                 BuilderHelper.createNameAndContractFilter(ConfigInjector.class.getName(), elementName));
-        if(i==null) return null;
+        if(i==null) {
+            return null;
+        }
         return buildModel((ActiveDescriptor<? extends ConfigInjector>) i);
     }
 
@@ -153,7 +167,9 @@ public class DomDocument<T extends Dom> {
         public boolean matches(Descriptor d) {
             if (d.getQualifiers().contains(InjectionTarget.class.getName())) {
                 List<String> list = d.getMetadata().get("target");
-                if (list == null) return false;
+                if (list == null) {
+                    return false;
+                }
 
                 String value = list.get(0) ;
 
@@ -263,8 +279,9 @@ public class DomDocument<T extends Dom> {
     DataType getValidator(String dataType) {
         synchronized(validators) {
             DataType validator = validators.get(dataType);
-            if (validator != null)
+            if (validator != null) {
                 return (validator);
+            }
         }
         Collection<DataType> dtfh = habitat.getAllServices(DataType.class);
         synchronized(validators) {

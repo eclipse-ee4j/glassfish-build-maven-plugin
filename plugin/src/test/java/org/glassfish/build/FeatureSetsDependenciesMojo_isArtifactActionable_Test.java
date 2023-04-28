@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2022 Contributors to Eclipse Foundation. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -16,6 +17,10 @@
 
 package org.glassfish.build;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.maven.monitor.logging.DefaultLog;
 import org.apache.maven.plugin.logging.Log;
 import org.codehaus.plexus.logging.Logger;
@@ -26,20 +31,15 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.codehaus.plexus.logging.Logger.LEVEL_DEBUG;
 import static org.codehaus.plexus.logging.Logger.LEVEL_WARN;
 import static org.glassfish.build.FeatureSetsDependenciesMojo.isArtifactActionable;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FeatureSetsDependenciesMojo_isArtifactActionable_Test {
-    private ArtifactResult artifact = new ArtifactResult(new ArtifactRequest());
-    private Logger logger = new ConsoleLogger(LEVEL_WARN, "console");
-    private Log log = new DefaultLog(logger);
+    private final ArtifactResult artifact = new ArtifactResult(new ArtifactRequest());
+    private final Logger logger = new ConsoleLogger(LEVEL_WARN, "console");
+    private final Log log = new DefaultLog(logger);
 
     @BeforeEach
     void setUpArtifact() {

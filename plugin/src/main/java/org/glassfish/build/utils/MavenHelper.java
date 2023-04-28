@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2012, 2023 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -50,9 +51,7 @@ import org.apache.maven.shared.artifact.filter.collection.GroupIdFilter;
 import org.apache.maven.shared.artifact.filter.collection.ProjectTransitivityFilter;
 import org.apache.maven.shared.artifact.filter.collection.ScopeFilter;
 import org.apache.maven.shared.artifact.filter.collection.TypeFilter;
-
 import org.apache.tools.ant.types.ZipFileSet;
-
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
@@ -62,7 +61,6 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 import org.codehaus.plexus.util.WriterFactory;
-
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
@@ -161,7 +159,7 @@ public final class MavenHelper {
 
         List<File> attachedFiles = getFiles(dir, finalName + "*.*",
                 artifactName);
-        List<Artifact> attachedArtifacts = new ArrayList<Artifact>();
+        List<Artifact> attachedArtifacts = new ArrayList<>();
         if (!attachedFiles.isEmpty()) {
             for (File attached : attachedFiles) {
                 String tokens = attached.getName().substring(
@@ -240,7 +238,7 @@ public final class MavenHelper {
 
         List<File> files = getFiles(dir, finalName + ".*", finalName + "-*.");
         Map<String, File> extensionMap =
-                new HashMap<String, File>(files.size());
+                new HashMap<>(files.size());
         for (File file : files) {
             extensionMap.put(file.getName().substring(finalName.length() + 1),
                     file);

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 1997, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -21,6 +22,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.jvnet.hk2.component.MultiMap;
+import org.jvnet.hk2.config.Configured;
 
 /**
  * Represents a configuration transaction from an outside

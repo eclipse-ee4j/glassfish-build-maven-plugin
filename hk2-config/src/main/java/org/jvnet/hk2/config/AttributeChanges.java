@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2014, 2018 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -21,7 +22,7 @@ package org.jvnet.hk2.config;
  * @author jwells
  */
 public abstract class AttributeChanges {
-    private String name;
+    private final String name;
 
     public AttributeChanges(String name) {
         this.name = name;

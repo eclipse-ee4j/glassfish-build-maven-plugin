@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation
  * Copyright (c) 2007, 2020 Oracle and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -16,6 +17,10 @@
 
 package org.jvnet.hk2.config;
 
+import jakarta.validation.MessageInterpolator;
+import jakarta.validation.Payload;
+import jakarta.validation.metadata.ConstraintDescriptor;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
@@ -29,11 +34,8 @@ import java.util.TreeSet;
 import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import jakarta.validation.MessageInterpolator;
-import jakarta.validation.Payload;
-import jakarta.validation.metadata.ConstraintDescriptor;
 
-/*
+/**
  * Custom MessageInterpolatorImpl for HK2
  *
  * This message interpolator is different from the default one in the following
