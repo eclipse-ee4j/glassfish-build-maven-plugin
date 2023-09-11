@@ -16,9 +16,10 @@
 
 package org.glassfish.build.utils;
 
+import static java.util.Collections.emptyList;
+
 import java.io.File;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +47,7 @@ final class ZipHelper {
     /**
      * Lazy singleton holder.
      */
-    private static class LazyHolder {
+    private static final class LazyHolder {
 
         /**
          * The singleton instance.
@@ -56,6 +57,7 @@ final class ZipHelper {
 
     /**
      * Get the Singleton instance for {@code ZipHelper}.
+     *
      * @return the {@code ZipHelper} instance
      */
     static ZipHelper getInstance() {
@@ -64,25 +66,20 @@ final class ZipHelper {
 
     /**
      * Create a zip file.
+     *
      * @param properties Ant project properties
      * @param mavenLog Maven logger
-     * @param duplicate behavior for duplicate file, one of "add", "preserve"
-     * or "fail"
-     * @param fsets list of {@code ZipFileSet} that describe the resources to
-     * zip
+     * @param duplicate behavior for duplicate file, one of "add", "preserve" or "fail"
+     * @param fsets list of {@code ZipFileSet} that describe the resources to zip
      * @param target the {@code File} instance for the zip file to create
      * @param timestamp optional reproducible build timestamp
      */
-    void zip(final Properties properties,
-            final Log mavenLog,
-            final String duplicate,
-            final List<ZipFileSet> fsets,
-            final File target,
+    void zip(final Properties properties, final Log mavenLog, final String duplicate, final List<ZipFileSet> fsets, final File target,
             final Optional<Instant> timestamp) {
 
         Project antProject = new Project();
         antProject.addBuildListener(new AntBuildListener(mavenLog));
-        Iterator it = properties.keySet().iterator();
+        Iterator<Object> it = properties.keySet().iterator();
         while (it.hasNext()) {
             String key = (String) it.next();
             antProject.setProperty(key, properties.getProperty(key));
@@ -101,18 +98,18 @@ final class ZipHelper {
 
         List<ZipFileSet> filesets;
         if (fsets == null) {
-            filesets = Collections.EMPTY_LIST;
+            filesets = emptyList();
         } else {
             filesets = fsets;
         }
 
         if (filesets.isEmpty()) {
-            ZipFileSet zfs = MavenHelper.createZipFileSet(new File(""), "", "");
+            ZipFileSet zipFileSet = MavenHelper.createZipFileSet(new File(""), "", "");
             // work around for
             // http://issues.apache.org/bugzilla/show_bug.cgi?id=42122
-            zfs.setDirMode("755");
-            zfs.setFileMode("644");
-            filesets.add(zfs);
+            zipFileSet.setDirMode("755");
+            zipFileSet.setFileMode("644");
+            filesets.add(zipFileSet);
         }
 
         for (ZipFileSet fset : filesets) {
@@ -122,6 +119,7 @@ final class ZipHelper {
                 mavenLog.info(String.format("[zip] %s", desc));
             }
         }
+
         zip.executeMain();
     }
 
@@ -142,6 +140,7 @@ final class ZipHelper {
 
         /**
          * Create a new {@code AntBuildListener} instance.
+         *
          * @param mavenLog Maven logger
          */
         private AntBuildListener(final Log mavenLog) {

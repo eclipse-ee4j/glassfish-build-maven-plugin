@@ -16,6 +16,8 @@
 
 package org.glassfish.build.utils;
 
+import static java.util.Collections.emptyList;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -83,15 +85,15 @@ public final class MavenHelper {
 
     /**
      * Reads a given model.
+     *
      * @param pom the pom File
      * @return an instance of Model
      * @throws MojoExecutionException if an {@code IOException} occurs
      */
-    public static Model readModel(final File pom)
-            throws MojoExecutionException {
+    public static Model readModel(final File pom) throws MojoExecutionException {
 
         try {
-           return new DefaultModelReader().read(pom, null);
+            return new DefaultModelReader().read(pom, null);
         } catch (IOException ex) {
             throw new MojoExecutionException(ex.getMessage(), ex);
         }
@@ -99,6 +101,7 @@ public final class MavenHelper {
 
     /**
      * Get the final name of a project artifact from a {@code Model} instance.
+     *
      * @param model the model
      * @return the final name of the artifact
      */
@@ -113,31 +116,28 @@ public final class MavenHelper {
                 version = model.getVersion();
             } else {
                 if (model.getParent() == null) {
-                    throw new IllegalStateException(
-                            "no version defined and no parent found");
+                    throw new IllegalStateException("no version defined and no parent found");
                 }
                 version = model.getParent().getVersion();
             }
             finalName = model.getArtifactId() + "-" + version;
         }
+
         return finalName;
     }
 
     /**
-     * Create a list of attached artifacts and their associated files by
-     * searching for <code>target/${project.build.finalName}-*.*</code>.
+     * Create a list of attached artifacts and their associated files by searching for
+     * <code>target/${project.build.finalName}-*.*</code>.
+     *
      * @param dir ${project.build.directory}
-     * @param artifact the main artifact for which corresponding attached
-     * artifacts will be searched
+     * @param artifact the main artifact for which corresponding attached artifacts will be searched
      * @param model an instance of model
      * @return the list of attached artifacts
-     * @throws MojoExecutionException if an error occurred while searching
-     * files
+     * @throws MojoExecutionException if an error occurred while searching files
      */
-    public static List<Artifact> createAttachedArtifacts(final String dir,
-            final Artifact artifact,
-            final Model model) throws MojoExecutionException {
-
+    public static List<Artifact> createAttachedArtifacts(final String dir, final Artifact artifact, final Model model)
+            throws MojoExecutionException {
         if (dir == null || dir.isEmpty()) {
             throw new IllegalArgumentException("dir is null or empty");
         }
@@ -153,19 +153,16 @@ public final class MavenHelper {
         String finalName;
         if (artifact.getFile() != null && artifact.getFile().exists()) {
             artifactName = artifact.getFile().getName();
-            finalName = artifactName.substring(0,
-                    artifactName.lastIndexOf('.'));
+            finalName = artifactName.substring(0, artifactName.lastIndexOf('.'));
         } else {
             finalName = getFinalName(model);
         }
 
-        List<File> attachedFiles = getFiles(dir, finalName + "*.*",
-                artifactName);
+        List<File> attachedFiles = getFiles(dir, finalName + "*.*", artifactName);
         List<Artifact> attachedArtifacts = new ArrayList<Artifact>();
         if (!attachedFiles.isEmpty()) {
             for (File attached : attachedFiles) {
-                String tokens = attached.getName().substring(
-                        finalName.length());
+                String tokens = attached.getName().substring(finalName.length());
 
                 // pom is not an attached artifact
                 if (tokens.endsWith(".pom")) {
@@ -175,16 +172,9 @@ public final class MavenHelper {
                 String type;
                 if (tokens.endsWith(".asc")) {
                     // compute type as xxx.asc
-                    type = tokens.substring(
-                            tokens.substring(0,
-                                    tokens.length()
-                                    - ".asc".length()).lastIndexOf('.')
-                                    + 1,
-                            tokens.length());
+                    type = tokens.substring(tokens.substring(0, tokens.length() - ".asc".length()).lastIndexOf('.') + 1, tokens.length());
                 } else {
-                    type = tokens.substring(
-                            tokens.lastIndexOf('.') + 1,
-                            tokens.length());
+                    type = tokens.substring(tokens.lastIndexOf('.') + 1, tokens.length());
                 }
 
                 String classifier;
@@ -193,41 +183,33 @@ public final class MavenHelper {
                     classifier = "";
                 } else {
                     // classifier = tokens - type
-                    classifier = tokens.substring(
-                            tokens.lastIndexOf('-') + 1,
-                            tokens.length() - (type.length() + 1));
+                    classifier = tokens.substring(tokens.lastIndexOf('-') + 1, tokens.length() - (type.length() + 1));
 
                     if (classifier.contains(artifact.getVersion())) {
                         classifier = classifier.substring(
-                                classifier.indexOf(artifact.getVersion() + 1,
-                                classifier.length()
-                                        - (artifact.getVersion().length())));
+                                classifier.indexOf(artifact.getVersion() + 1, classifier.length() - (artifact.getVersion().length())));
                     }
                 }
 
-                Artifact attachedArtifact = createArtifact(model, type,
-                        classifier);
+                Artifact attachedArtifact = createArtifact(model, type, classifier);
                 attachedArtifact.setFile(attached);
                 attachedArtifacts.add(attachedArtifact);
             }
         }
+
         return attachedArtifacts;
     }
 
     /**
-     * Search for a file matching an artifact for the given {@code finalName}
-     * and model.
+     * Search for a file matching an artifact for the given {@code finalName} and model.
+     *
      * @param dir the directory to search
      * @param finalName the artifact final name
      * @param model the project model
      * @return the {@code Artifact} instance
-     * @throws MojoExecutionException if an error occurred while searching
-     * files
+     * @throws MojoExecutionException if an error occurred while searching files
      */
-    private static Artifact getArtifactFile(final String dir,
-            final String finalName,
-            final Model model) throws MojoExecutionException {
-
+    private static Artifact getArtifactFile(final String dir, final String finalName, final Model model) throws MojoExecutionException {
         if (dir == null || dir.isEmpty()) {
             throw new IllegalArgumentException("dir is null or empty");
         }
@@ -239,11 +221,9 @@ public final class MavenHelper {
         }
 
         List<File> files = getFiles(dir, finalName + ".*", finalName + "-*.");
-        Map<String, File> extensionMap =
-                new HashMap<String, File>(files.size());
+        Map<String, File> extensionMap = new HashMap<String, File>(files.size());
         for (File file : files) {
-            extensionMap.put(file.getName().substring(finalName.length() + 1),
-                    file);
+            extensionMap.put(file.getName().substring(finalName.length() + 1), file);
         }
 
         // 1. guess the extension from the packaging
@@ -259,68 +239,62 @@ public final class MavenHelper {
             if (!ext.equals("pom") && !ext.endsWith(".asc")) {
                 // packaging does not match the type
                 // hence we provide type = ext
-                Artifact artifact = createArtifact(model, ext,
-                        /* classifier */ null);
+                Artifact artifact = createArtifact(model, ext, /* classifier */ null);
                 artifact.setFile(extensionMap.get(ext));
                 return artifact;
             }
         }
+
         return null;
     }
 
     /**
      * Create an artifact and its associated file by searching for
      * <code>target/${project.build.finalName}.${project.packaging}</code>.
+     *
      * @param dir ${project.build.directory}
      * @param model an instance of model
      * @return the created {@code Artifact} instance
-     * @throws MojoExecutionException if an error occurred while searching
-     * files
+     * @throws MojoExecutionException if an error occurred while searching files
      */
-    public static Artifact createArtifact(final String dir, final Model model)
-            throws MojoExecutionException {
-
-        // resolving using finalName
+    public static Artifact createArtifact(final String dir, final Model model) throws MojoExecutionException {
+        // Resolving using finalName
         Artifact artifact = getArtifactFile(dir, getFinalName(model), model);
         if (artifact == null) {
-            // resolving using artifactId
+            // Resolving using artifactId
             artifact = getArtifactFile(dir, model.getArtifactId(), model);
         }
+
         return artifact;
     }
 
     /**
      * Returns the pom installed in target or null if not found.
+     *
      * @param dir ${project.build.directory}
      * @return an instance of the pom file or null if not found
-     * @throws MojoExecutionException if an error occurred while searching
-     * files
+     * @throws MojoExecutionException if an error occurred while searching files
      */
-    public static File getPomInTarget(final String dir)
-            throws MojoExecutionException {
-
-        // check for an existing .pom
-         List<File> poms = getFiles(dir, /* includes */ "*.pom",
-                 /* excludes */ "");
-         if (!poms.isEmpty()) {
+    public static File getPomInTarget(final String dir) throws MojoExecutionException {
+        // Check for an existing .pom
+        List<File> poms = getFiles(dir, /* includes */ "*.pom", /* excludes */ "");
+        if (!poms.isEmpty()) {
             return poms.get(0);
-         }
-         return null;
+        }
+
+        return null;
     }
 
     /**
-     * Return the files contained in the directory, using inclusion and
-     * exclusion ant patterns.
+     * Return the files contained in the directory, using inclusion and exclusion ant patterns.
+     *
      * @param dirPath the directory to scan
      * @param includes the includes pattern, comma separated
      * @param excludes the excludes pattern, comma separated
      * @return the list of files found
      * @throws MojoExecutionException if an IOException occurred
      */
-    public static List<File> getFiles(final String dirPath,
-            final String includes,
-            final String excludes) throws MojoExecutionException {
-
+    public static List<File> getFiles(final String dirPath, final String includes, final String excludes) throws MojoExecutionException {
         if (dirPath == null || dirPath.isEmpty()) {
             throw new IllegalArgumentException("dir is null or empty");
         }
@@ -333,11 +307,13 @@ public final class MavenHelper {
                 throw new MojoExecutionException(ex.getMessage(), ex);
             }
         }
-        return Collections.EMPTY_LIST;
+
+        return emptyList();
     }
 
     /**
      * Creates an artifact instance for the supplied coordinates.
+     *
      * @param groupId The groupId
      * @param artifactId The artifactId
      * @param version The version
@@ -345,34 +321,27 @@ public final class MavenHelper {
      * @param classifier The classifier
      * @return the created artifact
      */
-    public static Artifact createArtifact(final String groupId,
-            final String artifactId,
-            final String version,
-            final String type,
+    public static Artifact createArtifact(final String groupId, final String artifactId, final String version, final String type,
             final String classifier) {
 
-        return new DefaultArtifact(groupId, artifactId,
-                VersionRange.createFromVersion(version),
-                /* scope */ "runtime", type, classifier,
+        return new DefaultArtifact(groupId, artifactId, VersionRange.createFromVersion(version), /* scope */ "runtime", type, classifier,
                 new DefaultArtifactHandler(type));
     }
 
     /**
      * Creates an artifact instance for the supplied model.
+     *
      * @param model the model
      * @param type the type of the artifact
      * @param classifier the classifier to use
      * @return the created artifact
      */
-    public static Artifact createArtifact(final Model model,
-            final String type,
-            final String classifier) {
+    public static Artifact createArtifact(final Model model, final String type, final String classifier) {
 
         String groupId = model.getGroupId();
         if (groupId == null) {
             if (model.getParent() == null) {
-                throw new IllegalStateException(
-                        "groupId is null and parent is null");
+                throw new IllegalStateException("groupId is null and parent is null");
             }
             groupId = model.getParent().getGroupId();
         }
@@ -380,14 +349,12 @@ public final class MavenHelper {
         String version = model.getVersion();
         if (version == null) {
             if (model.getParent() == null) {
-                throw new IllegalStateException(
-                        "version is null and parent is null");
+                throw new IllegalStateException("version is null and parent is null");
             }
             version = model.getParent().getVersion();
         }
 
-        return createArtifact(groupId, model.getArtifactId(), version, type,
-                classifier);
+        return createArtifact(groupId, model.getArtifactId(), version, type, classifier);
     }
 
     /**
@@ -397,64 +364,58 @@ public final class MavenHelper {
      * @return the created artifact
      */
     public static Artifact createArtifact(final Model model) {
-        return createArtifact(model, model.getPackaging(),
-                /* classifier */ null);
+        return createArtifact(model, model.getPackaging(), /* classifier */ null);
     }
 
     /**
      * Creates an artifact instance for the supplied coordinates.
+     *
      * @param groupId The groupId
      * @param artifactId The artifactId
      * @param version The version
      * @param type The type of the artifact. e.g "jar", "war" or "zip"
      * @return the created artifact
      */
-    public static Artifact createArtifact(final String groupId,
-            final String artifactId,
-            final String version,
-            final String type) {
+    public static Artifact createArtifact(final String groupId, final String artifactId, final String version, final String type) {
 
-        return createArtifact(groupId, artifactId, version, type,
-                /* classifier */ null);
+        return createArtifact(groupId, artifactId, version, type, /* classifier */ null);
     }
 
     /**
      * Creates an artifact instance from a dependency object.
+     *
      * @param dep the dependency object
      * @return the created artifact
      */
     public static Artifact createArtifact(final Dependency dep) {
-        return createArtifact(dep.getGroupId(), dep.getArtifactId(),
-                dep.getVersion(), dep.getType(), dep.getClassifier());
+        return createArtifact(dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), dep.getType(), dep.getClassifier());
     }
 
     /**
      * Write a model to <code>buildDir/${project.build.finalName}.pom</code>.
+     *
      * @param model an instance of model
      * @param buildDir the directory in which to write the pom
      * @throws IOException if an error occurred while writing the file
      */
-    public static void writePom(final Model model, final File buildDir)
-            throws IOException {
+    public static void writePom(final Model model, final File buildDir) throws IOException {
 
         writePom(model, buildDir, /* pomFileName */ null);
     }
 
     /**
      * Write the model to <code>buildDir/${project.build.finalName}.pom</code>.
+     *
      * @param model an instance of model
      * @param buildDir the directory in which to write the pom
      * @param pomFileName the name of the written pom
      * @throws IOException if an error occurred while writing the file
      */
-    public static void writePom(final Model model,
-            final File buildDir,
-            final String pomFileName) throws IOException {
+    public static void writePom(final Model model, final File buildDir, final String pomFileName) throws IOException {
 
         String pom;
         if (pomFileName == null) {
-            if (model.getBuild() != null
-                    && model.getBuild().getFinalName() != null) {
+            if (model.getBuild() != null && model.getBuild().getFinalName() != null) {
                 pom = model.getBuild().getFinalName() + ".pom";
             } else {
                 pom = "pom.xml";
@@ -470,12 +431,12 @@ public final class MavenHelper {
 
     /**
      * Read a model as a {@code String}.
+     *
      * @param model the model
      * @return the model as a {@code String}
      * @throws MojoExecutionException if an IOException occurred
      */
-    public static String modelAsString(final Model model)
-            throws MojoExecutionException {
+    public static String modelAsString(final Model model) throws MojoExecutionException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -488,9 +449,9 @@ public final class MavenHelper {
 
     /**
      * Filters a set of artifacts.
+     *
      * @param artifacts the set of artifacts to filter
-     * @param dependencyArtifacts the set of artifact representing direct
-     * dependencies
+     * @param dependencyArtifacts the set of artifact representing direct dependencies
      * @param excludeTransitive exclude transitive dependencies
      * @param includeScope the scopes to include, comma separated, can be null
      * @param excludeScope the scopes to exclude, comma separated, can be null
@@ -499,113 +460,70 @@ public final class MavenHelper {
      * @return the set of filtered artifacts
      * @throws MojoExecutionException if an error occurred while filtering
      */
-    public static Set<Artifact> filterArtifacts(final Set<Artifact> artifacts,
-            final Set<Artifact> dependencyArtifacts,
-            final boolean excludeTransitive,
-            final String includeScope,
-            final String excludeScope,
-            final String excludeTypes,
+    public static Set<Artifact> filterArtifacts(final Set<Artifact> artifacts, final Set<Artifact> dependencyArtifacts,
+            final boolean excludeTransitive, final String includeScope, final String excludeScope, final String excludeTypes,
             final String includeTypes) throws MojoExecutionException {
 
-        return filterArtifacts(artifacts, dependencyArtifacts,
-                excludeTransitive, includeScope, excludeScope, includeTypes,
-                excludeTypes, /* includeClassifiers */ null,
-                /* excludeClassifiers */ null, /* includeGroupIds */ null,
-                /* excludeGroupIds */ null, /* includeArtifactIds */ null,
-                /* excludeArtifactIds */ null);
+        return filterArtifacts(artifacts, dependencyArtifacts, excludeTransitive, includeScope, excludeScope, includeTypes, excludeTypes,
+                /* includeClassifiers */ null, /* excludeClassifiers */ null, /* includeGroupIds */ null, /* excludeGroupIds */ null,
+                /* includeArtifactIds */ null, /* excludeArtifactIds */ null);
     }
 
     /**
      * Filters a set of artifacts.
+     *
      * @param artifacts the set of artifacts to filter
-     * @param dependencyArtifacts the set of artifact representing direct
-     * dependencies
+     * @param dependencyArtifacts the set of artifact representing direct dependencies
      * @return the set of filtered artifacts
      * @throws MojoExecutionException if an error occurred while filtering
      */
-    public static Set<Artifact> excludeTransitive(final Set<Artifact> artifacts,
-            final Set<Artifact> dependencyArtifacts)
+    public static Set<Artifact> excludeTransitive(final Set<Artifact> artifacts, final Set<Artifact> dependencyArtifacts)
             throws MojoExecutionException {
 
-        return filterArtifacts(artifacts, dependencyArtifacts,
-                /* excludeTransitive */ true, /* includeScope */ null,
-                /* excludeScope */ null, /* includeTypes */ null,
-                /* excludeTypes */ null, /* includeClassifiers */ null,
-                /* excludeClassifiers */ null, /* includeGroupIds */ null,
-                /* excludeGroupIds */ null, /* includeArtifactIds */ null,
+        return filterArtifacts(artifacts, dependencyArtifacts, /* excludeTransitive */ true, /* includeScope */ null,
+                /* excludeScope */ null, /* includeTypes */ null, /* excludeTypes */ null, /* includeClassifiers */ null,
+                /* excludeClassifiers */ null, /* includeGroupIds */ null, /* excludeGroupIds */ null, /* includeArtifactIds */ null,
                 /* excludeArtifactIds */ null);
     }
 
     /**
      * Filters a set of artifacts.
+     *
      * @param artifacts the set of artifacts to filter
-     * @param dependencyArtifacts the set of artifact representing direct
-     * dependencies
+     * @param dependencyArtifacts the set of artifact representing direct dependencies
      * @param excludeTransitive exclude transitive dependencies
-     * @param includeScope the scopes to include, comma separated, can be
-     * {@code null}
-     * @param excludeScope the scopes to exclude, comma separated, can be
-     * {@code null}
-     * @param excludeTypes the types to exclude, comma separated, can be
-     * {@code null}
-     * @param includeTypes the types to include, comma separated, can be
-     * {@code null}
-     * @param includeClassifiers the classifiers to include, comma separated,
-     * can be {@code null}
-     * @param excludeClassifiers the classifiers to exclude, comma separated,
-     * can be {@code null}
-     * @param includeGroupIds the groupIds to include, comma separated,
-     * can be {@code null}
-     * @param excludeGroupIds the groupIds to exclude, comma separated,
-     * can be {@code null}
-     * @param includeArtifactIds the artifactIds to include, comma separated,
-     * can be {@code null}
-     * @param excludeArtifactIds the artifactIds to exclude, comma separated,
-     * can be {@code null}
+     * @param includeScope the scopes to include, comma separated, can be {@code null}
+     * @param excludeScope the scopes to exclude, comma separated, can be {@code null}
+     * @param excludeTypes the types to exclude, comma separated, can be {@code null}
+     * @param includeTypes the types to include, comma separated, can be {@code null}
+     * @param includeClassifiers the classifiers to include, comma separated, can be {@code null}
+     * @param excludeClassifiers the classifiers to exclude, comma separated, can be {@code null}
+     * @param includeGroupIds the groupIds to include, comma separated, can be {@code null}
+     * @param excludeGroupIds the groupIds to exclude, comma separated, can be {@code null}
+     * @param includeArtifactIds the artifactIds to include, comma separated, can be {@code null}
+     * @param excludeArtifactIds the artifactIds to exclude, comma separated, can be {@code null}
      * @return the set of filtered artifacts
      * @throws MojoExecutionException if an error occurred while filtering
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public static Set<Artifact> filterArtifacts(final Set<Artifact> artifacts,
-            final Set<Artifact> dependencyArtifacts,
-            final boolean excludeTransitive,
-            final String includeScope,
-            final String excludeScope,
-            final String excludeTypes,
-            final String includeTypes,
-            final String includeClassifiers,
-            final String excludeClassifiers,
-            final String includeGroupIds,
-            final String excludeGroupIds,
-            final String includeArtifactIds,
-            final String excludeArtifactIds) throws MojoExecutionException {
-
+    public static Set<Artifact> filterArtifacts(final Set<Artifact> artifacts, final Set<Artifact> dependencyArtifacts,
+            final boolean excludeTransitive, final String includeScope, final String excludeScope, final String excludeTypes,
+            final String includeTypes, final String includeClassifiers, final String excludeClassifiers, final String includeGroupIds,
+            final String excludeGroupIds, final String includeArtifactIds, final String excludeArtifactIds) throws MojoExecutionException {
 
         FilterArtifacts filter = new FilterArtifacts();
 
-        filter.addFilter(new ProjectTransitivityFilter(
-                dependencyArtifacts,
-                excludeTransitive));
+        filter.addFilter(new ProjectTransitivityFilter(dependencyArtifacts, excludeTransitive));
 
-        filter.addFilter(new ScopeFilter(
-                cleanToBeTokenizedString(includeScope),
-                cleanToBeTokenizedString(excludeScope)));
+        filter.addFilter(new ScopeFilter(cleanToBeTokenizedString(includeScope), cleanToBeTokenizedString(excludeScope)));
 
-        filter.addFilter(new TypeFilter(
-                cleanToBeTokenizedString(includeTypes),
-                cleanToBeTokenizedString(excludeTypes)));
+        filter.addFilter(new TypeFilter(cleanToBeTokenizedString(includeTypes), cleanToBeTokenizedString(excludeTypes)));
 
-        filter.addFilter(new ClassifierFilter(
-                cleanToBeTokenizedString(includeClassifiers),
-                cleanToBeTokenizedString(excludeClassifiers)));
+        filter.addFilter(new ClassifierFilter(cleanToBeTokenizedString(includeClassifiers), cleanToBeTokenizedString(excludeClassifiers)));
 
-        filter.addFilter(new GroupIdFilter(
-                cleanToBeTokenizedString(includeGroupIds),
-                cleanToBeTokenizedString(excludeGroupIds)));
+        filter.addFilter(new GroupIdFilter(cleanToBeTokenizedString(includeGroupIds), cleanToBeTokenizedString(excludeGroupIds)));
 
-        filter.addFilter(new ArtifactIdFilter(
-                cleanToBeTokenizedString(includeArtifactIds),
-                cleanToBeTokenizedString(excludeArtifactIds)));
+        filter.addFilter(new ArtifactIdFilter(cleanToBeTokenizedString(includeArtifactIds), cleanToBeTokenizedString(excludeArtifactIds)));
 
         try {
             return filter.filter(artifacts);
@@ -616,6 +534,7 @@ public final class MavenHelper {
 
     /**
      * Unpacks a given file.
+     *
      * @param file the file to unpack
      * @param location the directory where to unpack
      * @param includes includes pattern for the files to unpack
@@ -625,14 +544,8 @@ public final class MavenHelper {
      * @param archiverManager an instance of ArchiveManager
      * @throws MojoExecutionException if an error occurred while unpacking
      */
-    public static void unpack(final File file,
-            final File location,
-            final String includes,
-            final String excludes,
-            final boolean silent,
-            final Log log,
-            final ArchiverManager archiverManager)
-            throws MojoExecutionException {
+    public static void unpack(final File file, final File location, final String includes, final String excludes, final boolean silent,
+            final Log log, final ArchiverManager archiverManager) throws MojoExecutionException {
 
         if (log != null && log.isInfoEnabled() && !silent) {
             log.info(logUnpack(file, location, includes, excludes));
@@ -645,13 +558,10 @@ public final class MavenHelper {
             unArchiver.setSourceFile(file);
             unArchiver.setDestDirectory(location);
 
-            if (StringUtils.isNotEmpty(excludes)
-                    || StringUtils.isNotEmpty(includes)) {
+            if (StringUtils.isNotEmpty(excludes) || StringUtils.isNotEmpty(includes)) {
 
-                IncludeExcludeFileSelector[] selectors =
-                        new IncludeExcludeFileSelector[]{
-                    new IncludeExcludeFileSelector()
-                };
+                IncludeExcludeFileSelector[] selectors = new IncludeExcludeFileSelector[] {
+                    new IncludeExcludeFileSelector() };
 
                 if (StringUtils.isNotEmpty(excludes)) {
                     selectors[0].setExcludes(excludes.split(","));
@@ -666,25 +576,20 @@ public final class MavenHelper {
         } catch (NoSuchArchiverException e) {
             throw new MojoExecutionException("Unknown archiver type", e);
         } catch (ArchiverException e) {
-            throw new MojoExecutionException(
-                    "Error unpacking file: " + file + " to: " + location
-                            + "\r\n" + e.toString(), e);
+            throw new MojoExecutionException("Error unpacking file: " + file + " to: " + location + "\r\n" + e.toString(), e);
         }
     }
 
     /**
      * Create the logging message for an unpack invocation.
+     *
      * @param file the file being unpacked
      * @param location the target directory for the unpack
      * @param includes the include patterns
      * @param excludes the exclude patterns
      * @return the created {@code String}
      */
-    private static String logUnpack(final File file,
-            final File location,
-            final String includes,
-            final String excludes) {
-
+    private static String logUnpack(final File file, final File location, final String includes, final String excludes) {
         StringBuilder msg = new StringBuilder();
         msg.append("Unpacking ");
         msg.append(file);
@@ -712,9 +617,9 @@ public final class MavenHelper {
 
     /**
      * Resolve a remote artifact using aether.
+     *
      * @param groupId the group identifier of the artifact, may be {@code null}
-     * @param artifactId the artifact identifier of the artifact, may be
-     * {@code null}
+     * @param artifactId the artifact identifier of the artifact, may be {@code null}
      * @param classifier the classifier of the artifact, may be {@code null}
      * @param type the type of the artifact, may be {@code null}
      * @param version the version of the artifact, may be {@code null}
@@ -722,23 +627,15 @@ public final class MavenHelper {
      * @param repoSession the repository session component
      * @param remoteRepos the remote repositories to use
      * @return the resolved artifact
-     * @throws MojoExecutionException if an error occurred while resolving the
-     * artifact
+     * @throws MojoExecutionException if an error occurred while resolving the artifact
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public static ArtifactResult resolveArtifact(final String groupId,
-            final String artifactId,
-            final String classifier,
-            final String type,
-            final String version,
-            final RepositorySystem repoSystem,
-            final RepositorySystemSession repoSession,
-            final List<RemoteRepository> remoteRepos)
-            throws MojoExecutionException {
+    public static ArtifactResult resolveArtifact(final String groupId, final String artifactId, final String classifier, final String type,
+            final String version, final RepositorySystem repoSystem, final RepositorySystemSession repoSession,
+            final List<RemoteRepository> remoteRepos) throws MojoExecutionException {
 
         ArtifactRequest request = new ArtifactRequest();
-        request.setArtifact(new org.eclipse.aether.artifact.DefaultArtifact(
-                groupId, artifactId, classifier, type, version));
+        request.setArtifact(new org.eclipse.aether.artifact.DefaultArtifact(groupId, artifactId, classifier, type, version));
         request.setRepositories(remoteRepos);
 
         ArtifactResult result;
@@ -747,31 +644,33 @@ public final class MavenHelper {
         } catch (ArtifactResolutionException e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
+
         return result;
     }
 
     /**
      * Clean the pattern string for future regexp usage.
+     *
      * @param str the string to cleanup
      * @return the cleaned string
      */
     public static String cleanToBeTokenizedString(final String str) {
-        String ret = "";
+        String tokenizedString = "";
         if (!StringUtils.isEmpty(str)) {
-            ret = str.trim().replaceAll("[\\s]*,[\\s]*", ",");
+            tokenizedString = str.trim().replaceAll("[\\s]*,[\\s]*", ",");
         }
-        return ret;
+
+        return tokenizedString;
     }
 
     /**
      * Write the given input to a file.
+     *
      * @param outfile the file to write to
      * @param input the input to write
      * @throws IOException if an error occurs while writing to the file
      */
-    public static void writeFile(final File outfile, final StringBuilder input)
-            throws IOException {
-
+    public static void writeFile(final File outfile, final StringBuilder input) throws IOException {
         Writer writer = WriterFactory.newXmlWriter(outfile);
         try {
             IOUtil.copy(input.toString(), writer);
@@ -782,6 +681,7 @@ public final class MavenHelper {
 
     /**
      * Convert a comma separated string into a list.
+     *
      * @param list the string containing items separated by comma(s)
      * @return list
      */
@@ -792,11 +692,13 @@ public final class MavenHelper {
                 return Arrays.asList(listArray);
             }
         }
-        return Collections.EMPTY_LIST;
+
+        return Collections.emptyList();
     }
 
     /**
      * Convert a to a comma separated {@code String}.
+     *
      * @param list the {@code List} to convert
      * @return the resulting {@code String}
      */
@@ -808,35 +710,32 @@ public final class MavenHelper {
                 sb.append(',');
             }
         }
+
         return sb.toString();
     }
 
     /**
      * Create an Ant {@code ZipFileSet}.
+     *
      * @param dir the resource directory
      * @param includes the list of include patterns
      * @param excludes the list of exclude patterns
      * @return the create {@code ZipFileSet}
      */
-    public static ZipFileSet createZipFileSet(final File dir,
-            final List<String> includes,
-            final List<String> excludes) {
+    public static ZipFileSet createZipFileSet(final File dir, final List<String> includes, final List<String> excludes) {
 
-        return createZipFileSet(dir, listToString(includes),
-                listToString(excludes));
+        return createZipFileSet(dir, listToString(includes), listToString(excludes));
     }
 
     /**
      * Create an Ant {@code ZipFileSet}.
+     *
      * @param dir the resource directory
      * @param includePatterns the include patterns in comma separated list
      * @param excludePatterns the exclude patterns in comma separate list
      * @return the create {@code ZipFileSet}
      */
-    public static ZipFileSet createZipFileSet(final File dir,
-            final String includePatterns,
-            final String excludePatterns) {
-
+    public static ZipFileSet createZipFileSet(final File dir, final String includePatterns, final String excludePatterns) {
         String includes = includePatterns;
         if (includePatterns == null) {
             includes = "";
@@ -849,30 +748,24 @@ public final class MavenHelper {
         fset.setDir(dir);
         fset.setIncludes(includes);
         fset.setExcludes(excludes);
-        fset.setDescription(String.format(
-                "file set: %s ( excludes: [ %s ], includes: [ %s ])",
-                dir.getAbsolutePath(), excludes, includes));
+        fset.setDescription(String.format("file set: %s ( excludes: [ %s ], includes: [ %s ])", dir.getAbsolutePath(), excludes, includes));
+
         return fset;
     }
 
     /**
      * Create a zip file.
+     *
      * @param props Ant project properties
      * @param log Maven logger
-     * @param duplicate behavior for duplicate file, one of "add", "preserve"
-     * or "fail"
-     * @param fsets list of {@code ZipFileSet} that describe the resources to
-     * zip
+     * @param duplicate behavior for duplicate file, one of "add", "preserve" or "fail"
+     * @param fsets list of {@code ZipFileSet} that describe the resources to zip
      * @param target the {@code File} instance for the zip file to create
      * @param timestamp optional reproducible build timestamp
      * @return the target file
      */
-    public static File createZip(final Properties props,
-            final Log log,
-            final String duplicate,
-            final List<ZipFileSet> fsets,
-            final File target,
-            final Optional<Instant> timestamp) {
+    public static File createZip(final Properties props, final Log log, final String duplicate, final List<ZipFileSet> fsets,
+            final File target, final Optional<Instant> timestamp) {
 
         ZipHelper.getInstance().zip(props, log, duplicate, fsets, target, timestamp);
         return target;

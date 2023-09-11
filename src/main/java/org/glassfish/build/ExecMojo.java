@@ -122,7 +122,7 @@ public final class ExecMojo extends AbstractMojo {
     /**
      * {@code BuilderListener} implementation to log Ant events.
      */
-    private class AntBuildListener implements BuildListener {
+    private final class AntBuildListener implements BuildListener {
 
         /**
          * Maximum Event priority that is logged.
