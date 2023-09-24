@@ -20,9 +20,15 @@ import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.codehaus.plexus.component.annotations.Component;
 
+/**
+ * Mapping of the distribution-fragment package type with the zip extension.
+ */
 @Component(role = ArtifactHandler.class, hint = "distribution-fragment")
 public class DistributionFragmentArtifactHandler extends DefaultArtifactHandler {
 
+    /**
+     * Creates the configured instance.
+     */
     public DistributionFragmentArtifactHandler() {
         super("distribution-fragment");
         setExtension("zip");

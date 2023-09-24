@@ -173,106 +173,6 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     @Parameter(property = PROPERTY_PREFIX + "skip", defaultValue = "false")
     private boolean skip;
 
-    /**
-     * Get the mapping for a given artifact.
-     * Lookup the configured mapping for a custom mapping, otherwise return the
-     * artifactId
-     *
-     * @param artifact the artifact to be mapped
-     * @return the mapped name for the artifact
-     */
-    private String getMapping(final Artifact artifact) {
-        if (artifact == null) {
-            throw new IllegalArgumentException("artifact must be non null");
-        }
-
-        if (mappings != null && !mappings.isEmpty()) {
-            for (final DependencyMapping mapping : mappings) {
-                // if groupId is supplied, filter groupId
-                if (mapping.getGroupId() != null && !mapping.getGroupId().isEmpty()) {
-                    if (!artifact.getGroupId().equals(mapping.getGroupId())) {
-                        continue;
-                    }
-                }
-                if (artifact.getArtifactId().equals(mapping.getArtifactId()) && mapping.getName() != null
-                    && !mapping.getName().isEmpty()) {
-                    return mapping.getName();
-                }
-            }
-        }
-        return artifact.getArtifactId();
-    }
-
-
-    /**
-     * Convert a {@code String} to a {@code List}.
-     *
-     * @param str the {@code String} to convert
-     * @param c the character used as separated in the {@code String}
-     * @return the converted {@code List}
-     */
-    private static List<String> stringAsList(final String str, final String c) {
-        if (str != null && !str.isEmpty()) {
-            return Arrays.asList(str.split(c));
-        }
-        return Collections.emptyList();
-    }
-
-
-    /**
-     * Match the given scope with the includeScope and excludeScope parameters.
-     *
-     * @param scope the scope to match
-     * @return {@code true} if the scope is included and not excluded,
-     *         {@code false} otherwise
-     */
-    private boolean isScopeIncluded(final String scope) {
-        return includeScope.contains(scope) && !excludeScope.contains(scope);
-    }
-
-
-    /**
-     * Match the given artifact against the exclusion list.
-     *
-     * @param excludes the exclusion list
-     * @param artifact the artifact to match
-     * @return {@code true} if the artifact is included, {@code false}
-     *         otherwise
-     */
-    @SuppressWarnings("checkstyle:MagicNumber")
-    private static boolean isArtifactExcluded(final List<String> excludes, final Artifact artifact) {
-        for (final String exclude : excludes) {
-            final String[] gav = exclude.split(":");
-            if (gav == null || gav.length == 0) {
-                continue;
-            }
-            switch (gav.length) {
-                // gav == artifactId
-                case 1:
-                    if (artifact.getArtifactId().equals(gav[0])) {
-                        return true;
-                    }
-                    break;
-                // gav == groupId:artifactId
-                case 2:
-                    if (artifact.getGroupId().equals(gav[0]) && artifact.getArtifactId().equals(gav[1])) {
-                        return true;
-                    }
-                    break;
-                // gav == groupId:artifactId:version
-                case 3:
-                    if (artifact.getGroupId().equals(gav[0]) && artifact.getArtifactId().equals(gav[1])
-                        && artifact.getVersion().equals(gav[2])) {
-                        return true;
-                    }
-                    break;
-                default:
-                    throw new IllegalArgumentException("invalid exclude entry");
-            }
-        }
-        return false;
-    }
-
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -356,8 +256,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
 
             // copy trumps unpack,
             // (but only if artifact is not excluded from copying already)
-            if (isArtifactActionable(dependency, copyTypesList, copyExcludes, getLog())) {
-
+            if (isArtifactActionable(dependency, copyTypesList, copyExcludes)) {
                 final String mapping = getMapping(dependency.getArtifact());
                 final File destFile = new File(stageDirectory, mapping + "." + dependency.getArtifact().getExtension());
                 final String relativeDestFile = destFile.getPath()
@@ -368,9 +267,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
                 } catch (final IOException ex) {
                     getLog().error(ex.getMessage(), ex);
                 }
-
-            } else if (isArtifactActionable(dependency, unpackTypesList, unpackExcludes, getLog())) {
-
+            } else if (isArtifactActionable(dependency, unpackTypesList, unpackExcludes)) {
                 final String mapping = getMapping(dependency.getArtifact());
                 final File destDir = new File(stageDirectory, mapping);
                 final String relativeDestDir = destDir.getPath().substring(project.getBasedir().getPath().length() + 1);
@@ -381,16 +278,100 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     }
 
 
-    private static boolean isArtifactActionable(final ArtifactResult dependency, final List<String> actionTypesList,
-        final List<String> actionExcludes, final Log log) {
+    /**
+     * Match the given scope with the includeScope and excludeScope parameters.
+     *
+     * @param scope the scope to match
+     * @return {@code true} if the scope is included and not excluded,
+     *         {@code false} otherwise
+     */
+    private boolean isScopeIncluded(final String scope) {
+        return includeScope.contains(scope) && !excludeScope.contains(scope);
+    }
+
+
+    private boolean isArtifactActionable(final ArtifactResult dependency, final List<String> actionTypesList,
+        final List<String> actionExcludes) {
         final boolean typeIncluded = actionTypesList.contains(dependency.getArtifact().getExtension());
         final boolean artifactExcluded = isArtifactExcluded(actionExcludes, dependency.getArtifact());
-
         if (artifactExcluded) {
-            log.debug("Excluded: " + dependency.getArtifact());
+            getLog().debug("Excluded: " + dependency.getArtifact());
+        }
+        return typeIncluded && !artifactExcluded;
+    }
+
+
+    /**
+     * Match the given artifact against the exclusion list.
+     *
+     * @param excludes the exclusion list
+     * @param artifact the artifact to match
+     * @return {@code true} if the artifact is included, {@code false}
+     *         otherwise
+     */
+    @SuppressWarnings("checkstyle:MagicNumber")
+    private static boolean isArtifactExcluded(final List<String> excludes, final Artifact artifact) {
+        for (final String exclude : excludes) {
+            final String[] gav = exclude.split(":");
+            if (gav == null || gav.length == 0) {
+                continue;
+            }
+            switch (gav.length) {
+                // gav == artifactId
+                case 1:
+                    if (artifact.getArtifactId().equals(gav[0])) {
+                        return true;
+                    }
+                    break;
+                // gav == groupId:artifactId
+                case 2:
+                    if (artifact.getGroupId().equals(gav[0]) && artifact.getArtifactId().equals(gav[1])) {
+                        return true;
+                    }
+                    break;
+                // gav == groupId:artifactId:version
+                case 3:
+                    if (artifact.getGroupId().equals(gav[0]) && artifact.getArtifactId().equals(gav[1])
+                        && artifact.getVersion().equals(gav[2])) {
+                        return true;
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("invalid exclude entry");
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Get the mapping for a given artifact.
+     * Lookup the configured mapping for a custom mapping, otherwise return the
+     * artifactId
+     *
+     * @param artifact the artifact to be mapped
+     * @return the mapped name for the artifact
+     */
+    private String getMapping(final Artifact artifact) {
+        if (artifact == null) {
+            throw new IllegalArgumentException("artifact must be non null");
         }
 
-        return typeIncluded && !artifactExcluded;
+        if (mappings != null && !mappings.isEmpty()) {
+            for (final DependencyMapping mapping : mappings) {
+                // if groupId is supplied, filter groupId
+                if (mapping.getGroupId() != null && !mapping.getGroupId().isEmpty()) {
+                    if (!artifact.getGroupId().equals(mapping.getGroupId())) {
+                        continue;
+                    }
+                }
+                if (artifact.getArtifactId().equals(mapping.getArtifactId()) && mapping.getName() != null
+                    && !mapping.getName().isEmpty()) {
+                    return mapping.getName();
+                }
+            }
+        }
+        return artifact.getArtifactId();
     }
 
 
@@ -447,5 +428,20 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
             msg.append(" with excludes \"").append(excludes).append('"');
         }
         return msg.toString();
+    }
+
+
+    /**
+     * Convert a {@code String} to a {@code List}.
+     *
+     * @param str the {@code String} to convert
+     * @param c the character used as separated in the {@code String}
+     * @return the converted {@code List}
+     */
+    private static List<String> stringAsList(final String str, final String c) {
+        if (str != null && !str.isEmpty()) {
+            return Arrays.asList(str.split(c));
+        }
+        return Collections.emptyList();
     }
 }

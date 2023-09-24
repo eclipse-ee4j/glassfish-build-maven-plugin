@@ -35,9 +35,15 @@ import org.glassfish.build.xpp3dom.PropertyElement;
 
 import static org.glassfish.build.xpp3dom.ConfigurationElement.getOrCreateConfiguration;
 
+/**
+ * Lifecycle of the glassfish-distribution package type.
+ */
 @Component(role = LifecycleMapping.class, hint = "glassfish-distribution")
 public class GlassFishDistributionLifecycle extends DefaultLifecycleMapping {
 
+    /**
+     * Creates the configured instance.
+     */
     public GlassFishDistributionLifecycle() {
         super(List.of(createLifecycle()));
     }

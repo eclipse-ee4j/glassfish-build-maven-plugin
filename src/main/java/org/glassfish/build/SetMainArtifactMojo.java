@@ -27,6 +27,10 @@ import org.apache.maven.project.MavenProject;
 
 /**
  * Set project's main artifact.
+ * <p>
+ * Useful in combination with the assembly-maven-plugin in a situation when it generates
+ * the one and only module's artifact without a classifier via a custom lifecycle,
+ * which results in complains of the maven install plugin about unset main artifact.
  */
 @Mojo(name = "set-main-artifact", threadSafe = true)
 public final class SetMainArtifactMojo extends AbstractMojo {

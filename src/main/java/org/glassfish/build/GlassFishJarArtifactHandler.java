@@ -20,9 +20,15 @@ import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.codehaus.plexus.component.annotations.Component;
 
+/**
+ * Mapping of the glassfish-jar package type with the jar file name extension.
+ */
 @Component(role = ArtifactHandler.class, hint = "glassfish-jar")
 public class GlassFishJarArtifactHandler extends DefaultArtifactHandler {
 
+    /**
+     * Creates the configured instance.
+     */
     public GlassFishJarArtifactHandler() {
         super("glassfish-jar");
         setExtension("jar");

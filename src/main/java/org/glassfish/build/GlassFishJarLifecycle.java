@@ -26,9 +26,15 @@ import org.apache.maven.lifecycle.mapping.LifecycleMapping;
 import org.apache.maven.lifecycle.mapping.LifecyclePhase;
 import org.codehaus.plexus.component.annotations.Component;
 
+/**
+ * Lifecycle of the glassfish-jar package type..
+ */
 @Component(role = LifecycleMapping.class, hint = "glassfish-jar")
 public class GlassFishJarLifecycle extends DefaultLifecycleMapping {
 
+    /**
+     * Creates the configured instance.
+     */
     public GlassFishJarLifecycle() {
         super(List.of(createLifecycle()));
     }

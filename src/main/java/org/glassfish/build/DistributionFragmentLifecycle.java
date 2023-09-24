@@ -36,9 +36,15 @@ import org.glassfish.build.xpp3dom.PropertyElement;
 
 import static org.glassfish.build.xpp3dom.ConfigurationElement.getOrCreateConfiguration;
 
+/**
+ * Lifecycle of the distribution-fragment package type.
+ */
 @Component(role = LifecycleMapping.class, hint = "distribution-fragment")
 public class DistributionFragmentLifecycle extends DefaultLifecycleMapping {
 
+    /**
+     * Creates a preconfigured lifecycle.
+     */
     public DistributionFragmentLifecycle() {
         super(List.of(createLifecycle()));
     }

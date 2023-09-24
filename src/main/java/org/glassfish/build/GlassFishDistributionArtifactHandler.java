@@ -20,9 +20,15 @@ import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.codehaus.plexus.component.annotations.Component;
 
+/**
+ * Mapping of the glassfish-distribution package type with the zip extension.
+ */
 @Component(role = ArtifactHandler.class, hint = "glassfish-distribution")
 public class GlassFishDistributionArtifactHandler extends DefaultArtifactHandler {
 
+    /**
+     * Creates the configured instance.
+     */
     public GlassFishDistributionArtifactHandler() {
         super("glassfish-distribution");
         setExtension("zip");
