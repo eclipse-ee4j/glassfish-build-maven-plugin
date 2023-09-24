@@ -48,5 +48,6 @@ public final class SetMainArtifactMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         project.getArtifact().setFile(file);
+        getLog().info("Project main artifact file set to " + file.getAbsolutePath());
     }
 }

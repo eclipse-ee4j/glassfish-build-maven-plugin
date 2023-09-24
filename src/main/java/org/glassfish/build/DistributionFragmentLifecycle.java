@@ -30,6 +30,11 @@ import org.apache.maven.lifecycle.mapping.LifecyclePhase;
 import org.apache.maven.model.Dependency;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.glassfish.build.xpp3dom.AssemblyDescriptorIdElements;
+import org.glassfish.build.xpp3dom.ConfigurationElement;
+import org.glassfish.build.xpp3dom.PropertyElement;
+
+import static org.glassfish.build.xpp3dom.ConfigurationElement.getOrCreateConfiguration;
 
 @Component(role = LifecycleMapping.class, hint = "distribution-fragment")
 public class DistributionFragmentLifecycle extends DefaultLifecycleMapping {
@@ -40,7 +45,7 @@ public class DistributionFragmentLifecycle extends DefaultLifecycleMapping {
 
 
     private static Lifecycle createLifecycle() {
-        Lifecycle lifecycle = new Lifecycle();
+        final Lifecycle lifecycle = new Lifecycle();
         lifecycle.setId("default");
         lifecycle.setLifecyclePhases(createPhases());
         return lifecycle;
@@ -60,18 +65,21 @@ public class DistributionFragmentLifecycle extends DefaultLifecycleMapping {
 
 
     private static LifecyclePhase createPackagePhase() {
-        final LifecyclePhase packagePhase = new LifecyclePhase("org.apache.maven.plugins:maven-assembly-plugin:single,"
+        final LifecyclePhase packagePhase = new LifecyclePhase(
+            "org.apache.maven.plugins:maven-assembly-plugin:single,"
             + "org.glassfish.build:glassfishbuild-maven-plugin:set-main-artifact");
+
         final LifecycleMojo assemblyMojo = packagePhase.getMojos().get(0);
         assemblyMojo.setConfiguration(createAssemblyCfg(assemblyMojo));
         assemblyMojo.setDependencies(createAssemblyDependencies(assemblyMojo));
+
         final LifecycleMojo setMainArtifactMojo = packagePhase.getMojos().get(1);
         setMainArtifactMojo.setConfiguration(createSetMainArtifactCfg(setMainArtifactMojo));
         return packagePhase;
     }
 
 
-    private static List<Dependency> createAssemblyDependencies(LifecycleMojo assemblyMojo) {
+    private static List<Dependency> createAssemblyDependencies(final LifecycleMojo assemblyMojo) {
         final List<Dependency> dependencies = getDependencies(assemblyMojo);
         final Dependency plugin = new Dependency();
         // FIXME: copy the descriptor out and configure assembly to use it.
@@ -84,56 +92,23 @@ public class DistributionFragmentLifecycle extends DefaultLifecycleMapping {
 
 
     private static Xpp3Dom createAssemblyCfg(final LifecycleMojo assemblyMojo) {
-        // TODO: use inline descriptor instead of the reference.
-        final Xpp3Dom appendAssemblyId = createNameValueDom("appendAssemblyId", "false");
         // assembly plugin attaches the artifact, but doesn't set it as main artifact except for pom types.
         // install plugin then fails the build OR if configured, prints a warning.
         // In our case we have just one artifact to be installed and deployed.
-        final Xpp3Dom attach = createNameValueDom("attach", "false");
-        final Xpp3Dom assemblyCfg = getConfiguration(assemblyMojo);
-        assemblyCfg.addChild(appendAssemblyId);
-        assemblyCfg.addChild(attach);
-        assemblyCfg.addChild(createDescriptorRefs());
-        return assemblyCfg;
-    }
-
-
-    private static Xpp3Dom createDescriptorRefs() {
-        final Xpp3Dom descriptorRef = createNameValueDom("descriptorRef", "distribution-fragment");
-        final Xpp3Dom descriptorRefs = createNameChildDom("descriptorRefs", descriptorRef);
-        return descriptorRefs;
-    }
-
-
-    private static Xpp3Dom createSetMainArtifactCfg(LifecycleMojo mojo) {
-        final Xpp3Dom file = createNameValueDom("file",
-            "${project.build.directory}" + File.separatorChar + "${project.build.finalName}.zip");
-        final Xpp3Dom type = createNameValueDom("type", "zip");
-        final Xpp3Dom cfg = getConfiguration(mojo);
-        cfg.addChild(file);
-        cfg.addChild(type);
+        final ConfigurationElement cfg = getOrCreateConfiguration(assemblyMojo);
+        cfg.addChild(new PropertyElement("appendAssemblyId", "false"));
+        cfg.addChild(new PropertyElement("attach", "false"));
+        cfg.addChild(new AssemblyDescriptorIdElements("distribution-fragment"));
         return cfg;
     }
 
 
-    private static Xpp3Dom createNameValueDom(String name, String value) {
-        final Xpp3Dom type = new Xpp3Dom(name);
-        type.setValue(value);
-        return type;
-    }
-
-
-    private static Xpp3Dom createNameChildDom(String name, Xpp3Dom... children) {
-        final Xpp3Dom type = new Xpp3Dom(name);
-        for (Xpp3Dom child : children) {
-            type.addChild(child);
-        }
-        return type;
-    }
-
-
-    private static Xpp3Dom getConfiguration(final LifecycleMojo mojo) {
-        return mojo.getConfiguration() == null ? new Xpp3Dom("configuration") : mojo.getConfiguration();
+    private static Xpp3Dom createSetMainArtifactCfg(final LifecycleMojo mojo) {
+        final ConfigurationElement cfg = getOrCreateConfiguration(mojo);
+        cfg.addChild(new PropertyElement("file",
+            "${project.build.directory}" + File.separatorChar + "${project.build.finalName}.zip"));
+        cfg.addChild(new PropertyElement("type", "zip"));
+        return cfg;
     }
 
 

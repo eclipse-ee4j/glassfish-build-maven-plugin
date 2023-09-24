@@ -35,12 +35,16 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-
+import org.apache.maven.shared.utils.StringUtils;
+import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
-
+import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
+import org.codehaus.plexus.components.io.fileselectors.IncludeExcludeFileSelector;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactDescriptorException;
@@ -49,8 +53,6 @@ import org.eclipse.aether.resolution.ArtifactDescriptorResult;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
-
-import static org.glassfish.build.utils.MavenHelper.unpack;
 
 /**
  * Resolves and unpack corresponding sources of project dependencies.
@@ -172,87 +174,6 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     private boolean skip;
 
     /**
-     * Configuration of dependency mapping to name.
-     * This allows customizing names of dependencies unpacked.
-     */
-    public static class DependencyMapping {
-
-        /**
-         * The groupId of the dependency.
-         */
-        private String groupId;
-
-        /**
-         * The artifacTId of the dependency.
-         */
-        private String artifactId;
-
-        /**
-         * The mapped name of the dependency.
-         */
-        private String name;
-
-        /**
-         * Set the artifactId of the dependency.
-         *
-         * @param depArtifactId the artifactId
-         */
-        public void setArtifactId(final String depArtifactId) {
-            this.artifactId = depArtifactId;
-        }
-
-
-        /**
-         * Get the artifactId of the dependency.
-         *
-         * @return the artifactId
-         */
-        public String getArtifactId() {
-            return artifactId;
-        }
-
-
-        /**
-         * Set the groupId of the dependency.
-         *
-         * @param depGroupId the groupId
-         */
-        public void setGroupId(final String depGroupId) {
-            this.groupId = depGroupId;
-        }
-
-
-        /**
-         * Get the groupId of the dependency.
-         *
-         * @return the groupId
-         */
-        public String getGroupId() {
-            return groupId;
-        }
-
-
-        /**
-         * Set the mapped name of the dependency.
-         *
-         * @param depName the mapped name
-         */
-        public void setName(final String depName) {
-            this.name = depName;
-        }
-
-
-        /**
-         * Get the mapped name of the dependency.
-         *
-         * @return the groupId
-         */
-        public String getName() {
-            return name;
-        }
-    }
-
-    /**
      * Get the mapping for a given artifact.
      * Lookup the configured mapping for a custom mapping, otherwise return the
      * artifactId
@@ -260,13 +181,13 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
      * @param artifact the artifact to be mapped
      * @return the mapped name for the artifact
      */
-    private String getMapping(final org.eclipse.aether.artifact.Artifact artifact) {
+    private String getMapping(final Artifact artifact) {
         if (artifact == null) {
             throw new IllegalArgumentException("artifact must be non null");
         }
 
         if (mappings != null && !mappings.isEmpty()) {
-            for (DependencyMapping mapping : mappings) {
+            for (final DependencyMapping mapping : mappings) {
                 // if groupId is supplied, filter groupId
                 if (mapping.getGroupId() != null && !mapping.getGroupId().isEmpty()) {
                     if (!artifact.getGroupId().equals(mapping.getGroupId())) {
@@ -318,9 +239,10 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
      * @return {@code true} if the artifact is included, {@code false}
      *         otherwise
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private static boolean isArtifactExcluded(final List<String> excludes, final Artifact artifact) {
-        for (String exclude : excludes) {
-            String[] gav = exclude.split(":");
+        for (final String exclude : excludes) {
+            final String[] gav = exclude.split(":");
             if (gav == null || gav.length == 0) {
                 continue;
             }
@@ -353,41 +275,41 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
 
 
     @Override
-    @SuppressWarnings("checkstyle:MethodLength")
     public void execute() throws MojoExecutionException {
         if (skip) {
             getLog().info("Skipping featuresets-dependencies");
             return;
         }
 
-        List<String> includeScopeList = stringAsList(includeScope, ",");
-        List<String> excludeScopeList = stringAsList(excludeScope, ",");
-        List<String> copyTypesList = stringAsList(copyTypes, ",");
-        List<String> unpackTypesList = stringAsList(unpackTypes, ",");
+        final List<String> includeScopeList = stringAsList(includeScope, ",");
+        final List<String> excludeScopeList = stringAsList(excludeScope, ",");
+        final List<String> copyTypesList = stringAsList(copyTypes, ",");
+        final List<String> unpackTypesList = stringAsList(unpackTypes, ",");
 
         // get all direct featureset dependencies's direct dependencies
         final Set<Dependency> dependencies = new HashSet<>();
-        for (org.apache.maven.artifact.Artifact artifact : project.getArtifacts()) {
+        for (final org.apache.maven.artifact.Artifact artifact : project.getArtifacts()) {
             if (featureSetGroupIdIncludes.contains(artifact.getGroupId())) {
-                ArtifactDescriptorRequest descriptorRequest = new ArtifactDescriptorRequest();
-                descriptorRequest.setArtifact(new org.eclipse.aether.artifact.DefaultArtifact(artifact.getGroupId(),
+                final ArtifactDescriptorRequest descriptorRequest = new ArtifactDescriptorRequest();
+                descriptorRequest.setArtifact(new DefaultArtifact(artifact.getGroupId(),
                     artifact.getArtifactId(), artifact.getClassifier(), artifact.getType(), artifact.getVersion()));
                 descriptorRequest.setRepositories(remoteRepos);
                 try {
-                    ArtifactDescriptorResult result = repoSystem.readArtifactDescriptor(repoSession, descriptorRequest);
+                    final ArtifactDescriptorResult result = repoSystem.readArtifactDescriptor(repoSession,
+                        descriptorRequest);
                     dependencies.addAll(result.getDependencies());
-                } catch (ArtifactDescriptorException ex) {
+                } catch (final ArtifactDescriptorException ex) {
                     throw new MojoExecutionException(ex.getMessage(), ex);
                 }
             }
         }
 
         // build a request to resolve all dependencies
-        Set<ArtifactRequest> dependenciesRequest = new HashSet<>();
-        for (Dependency dependency : dependencies) {
-            String depScope = dependency.getScope();
+        final Set<ArtifactRequest> dependenciesRequest = new HashSet<>();
+        for (final Dependency dependency : dependencies) {
+            final String depScope = dependency.getScope();
             if (includeScopeList.contains(depScope) && !excludeScopeList.contains(depScope)) {
-                ArtifactRequest request = new ArtifactRequest();
+                final ArtifactRequest request = new ArtifactRequest();
                 request.setArtifact(dependency.getArtifact());
                 request.setRepositories(remoteRepos);
                 dependenciesRequest.add(request);
@@ -395,40 +317,33 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
         }
 
         // add project direct dependency
-        for (Object dependency : project.getDependencies()) {
-            if (dependency instanceof org.apache.maven.model.Dependency) {
-                org.apache.maven.model.Dependency directDependency = (org.apache.maven.model.Dependency) dependency;
-
-                // if the dependency is a feature set
-                // or not of proper scope
-                // skip
-                if (featureSetGroupIdIncludes.contains(directDependency.getGroupId())
-                    || !isScopeIncluded(directDependency.getScope())) {
-                    continue;
-                }
-
-                ArtifactRequest request = new ArtifactRequest();
-                request.setArtifact(new org.eclipse.aether.artifact.DefaultArtifact(directDependency.getGroupId(),
-                    directDependency.getArtifactId(), directDependency.getClassifier(), directDependency.getType(),
-                    directDependency.getVersion()));
-                request.setRepositories(remoteRepos);
-                dependenciesRequest.add(request);
+        for (final org.apache.maven.model.Dependency dependency : project.getDependencies()) {
+            // if the dependency is a feature set or not of proper scope skip
+            if (featureSetGroupIdIncludes.contains(dependency.getGroupId())
+                || !isScopeIncluded(dependency.getScope())) {
+                continue;
             }
+
+            final ArtifactRequest request = new ArtifactRequest();
+            request.setArtifact(new DefaultArtifact(dependency.getGroupId(), dependency.getArtifactId(),
+                dependency.getClassifier(), dependency.getType(), dependency.getVersion()));
+            request.setRepositories(remoteRepos);
+            dependenciesRequest.add(request);
         }
 
         // resolve all
         List<ArtifactResult> resolvedDependencies;
         try {
             resolvedDependencies = repoSystem.resolveArtifacts(repoSession, dependenciesRequest);
-        } catch (ArtifactResolutionException ex) {
+        } catch (final ArtifactResolutionException ex) {
             throw new MojoExecutionException(ex.getMessage(), ex);
         }
 
         stageDirectory.mkdir();
 
-        for (ArtifactResult dependency : resolvedDependencies) {
+        for (final ArtifactResult dependency : resolvedDependencies) {
 
-            File sourceFile = dependency.getArtifact().getFile();
+            final File sourceFile = dependency.getArtifact().getFile();
             if (sourceFile == null) {
                 getLog().error("dependency " + dependency.getArtifact().toString() + ", file is null");
                 continue;
@@ -443,37 +358,94 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
             // (but only if artifact is not excluded from copying already)
             if (isArtifactActionable(dependency, copyTypesList, copyExcludes, getLog())) {
 
-                String mapping = getMapping(dependency.getArtifact());
-                File destFile = new File(stageDirectory, mapping + "." + dependency.getArtifact().getExtension());
-                String relativeDestFile = destFile.getPath().substring(project.getBasedir().getPath().length() + 1);
+                final String mapping = getMapping(dependency.getArtifact());
+                final File destFile = new File(stageDirectory, mapping + "." + dependency.getArtifact().getExtension());
+                final String relativeDestFile = destFile.getPath()
+                    .substring(project.getBasedir().getPath().length() + 1);
                 getLog().info("Copying " + dependency.getArtifact() + " to " + relativeDestFile);
                 try {
                     Files.copy(sourceFile.toPath(), destFile.toPath());
-                } catch (IOException ex) {
+                } catch (final IOException ex) {
                     getLog().error(ex.getMessage(), ex);
                 }
 
             } else if (isArtifactActionable(dependency, unpackTypesList, unpackExcludes, getLog())) {
 
-                String mapping = getMapping(dependency.getArtifact());
-                File destDir = new File(stageDirectory, mapping);
-                String relativeDestDir = destDir.getPath().substring(project.getBasedir().getPath().length() + 1);
+                final String mapping = getMapping(dependency.getArtifact());
+                final File destDir = new File(stageDirectory, mapping);
+                final String relativeDestDir = destDir.getPath().substring(project.getBasedir().getPath().length() + 1);
                 getLog().info("Unpacking " + dependency.getArtifact() + " to " + relativeDestDir);
-                unpack(sourceFile, destDir, includes, excludes, /* silent */ true, getLog(), archiverManager);
+                unpack(sourceFile, destDir);
             }
         }
     }
 
 
-    static boolean isArtifactActionable(final ArtifactResult dependency, final List<String> actionTypesList,
+    private static boolean isArtifactActionable(final ArtifactResult dependency, final List<String> actionTypesList,
         final List<String> actionExcludes, final Log log) {
-        boolean typeIncluded = actionTypesList.contains(dependency.getArtifact().getExtension());
-        boolean artifactExcluded = isArtifactExcluded(actionExcludes, dependency.getArtifact());
+        final boolean typeIncluded = actionTypesList.contains(dependency.getArtifact().getExtension());
+        final boolean artifactExcluded = isArtifactExcluded(actionExcludes, dependency.getArtifact());
 
         if (artifactExcluded) {
-            log.info("Excluded: " + dependency.getArtifact().toString());
+            log.debug("Excluded: " + dependency.getArtifact());
         }
 
         return typeIncluded && !artifactExcluded;
+    }
+
+
+    private void unpack(final File file, final File location) throws MojoExecutionException {
+        final Log log = getLog();
+        if (log.isDebugEnabled()) {
+            log.debug(toLogMessage(file, location));
+        }
+        location.mkdirs();
+        try {
+            UnArchiver unArchiver = archiverManager.getUnArchiver(file);
+            unArchiver.setSourceFile(file);
+            unArchiver.setDestDirectory(location);
+
+            if (StringUtils.isNotEmpty(excludes) || StringUtils.isNotEmpty(includes)) {
+                IncludeExcludeFileSelector selector = new IncludeExcludeFileSelector();
+                if (StringUtils.isNotEmpty(excludes)) {
+                    selector.setExcludes(excludes.split(","));
+                }
+                if (StringUtils.isNotEmpty(includes)) {
+                    selector.setIncludes(includes.split(","));
+                }
+                unArchiver.setFileSelectors(new IncludeExcludeFileSelector[] {selector});
+            }
+            unArchiver.extract();
+        } catch (NoSuchArchiverException e) {
+            throw new MojoExecutionException("Unknown archiver type", e);
+        } catch (ArchiverException e) {
+            throw new MojoExecutionException("Error unpacking file: " + file + " to: " + location, e);
+        }
+    }
+
+
+    /**
+     * Create the logging message for an unpack invocation.
+     *
+     * @param file the file being unpacked
+     * @param location the target directory for the unpack
+     * @return the created {@code String}
+     */
+    private String toLogMessage(final File file, final File location) {
+        StringBuilder msg = new StringBuilder();
+        msg.append("Unpacking ");
+        msg.append(file);
+        msg.append(" to ");
+        msg.append(location);
+
+        if (includes != null && excludes != null) {
+            msg.append(" with includes \"").append(includes);
+            msg.append("\" and excludes \"").append(excludes).append('"');
+        } else if (includes != null) {
+            msg.append(" with includes \"").append(includes).append('"');
+        } else if (excludes != null) {
+            msg.append(" with excludes \"").append(excludes).append('"');
+        }
+        return msg.toString();
     }
 }

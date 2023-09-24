@@ -24,7 +24,6 @@
 <module name="Checker">
     <property name="fileExtensions" value="java, properties, xml"/>
 
-    <module name="JavadocPackage"/>
     <module name="NewlineAtEndOfFile"/>
     <module name="Translation"/>
     <module name="FileLength"/>
