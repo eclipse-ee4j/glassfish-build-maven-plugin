@@ -20,16 +20,12 @@ package org.glassfish.build.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -51,16 +47,13 @@ import org.apache.maven.shared.artifact.filter.collection.GroupIdFilter;
 import org.apache.maven.shared.artifact.filter.collection.ProjectTransitivityFilter;
 import org.apache.maven.shared.artifact.filter.collection.ScopeFilter;
 import org.apache.maven.shared.artifact.filter.collection.TypeFilter;
-import org.apache.tools.ant.types.ZipFileSet;
+import org.apache.maven.shared.utils.StringUtils;
+import org.apache.maven.shared.utils.io.FileUtils;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
 import org.codehaus.plexus.components.io.fileselectors.IncludeExcludeFileSelector;
-import org.codehaus.plexus.util.FileUtils;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.StringUtils;
-import org.codehaus.plexus.util.WriterFactory;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
@@ -331,7 +324,7 @@ public final class MavenHelper {
                 throw new MojoExecutionException(ex.getMessage(), ex);
             }
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     /**
@@ -761,22 +754,6 @@ public final class MavenHelper {
         return ret;
     }
 
-    /**
-     * Write the given input to a file.
-     * @param outfile the file to write to
-     * @param input the input to write
-     * @throws IOException if an error occurs while writing to the file
-     */
-    public static void writeFile(final File outfile, final StringBuilder input)
-            throws IOException {
-
-        Writer writer = WriterFactory.newXmlWriter(outfile);
-        try {
-            IOUtil.copy(input.toString(), writer);
-        } finally {
-            IOUtil.close(writer);
-        }
-    }
 
     /**
      * Convert a comma separated string into a list.
@@ -790,89 +767,6 @@ public final class MavenHelper {
                 return Arrays.asList(listArray);
             }
         }
-        return Collections.EMPTY_LIST;
-    }
-
-    /**
-     * Convert a to a comma separated {@code String}.
-     * @param list the {@code List} to convert
-     * @return the resulting {@code String}
-     */
-    private static String listToString(final List<String> list) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            sb.append(list.get(i));
-            if (i < list.size() - 1) {
-                sb.append(',');
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Create an Ant {@code ZipFileSet}.
-     * @param dir the resource directory
-     * @param includes the list of include patterns
-     * @param excludes the list of exclude patterns
-     * @return the create {@code ZipFileSet}
-     */
-    public static ZipFileSet createZipFileSet(final File dir,
-            final List<String> includes,
-            final List<String> excludes) {
-
-        return createZipFileSet(dir, listToString(includes),
-                listToString(excludes));
-    }
-
-    /**
-     * Create an Ant {@code ZipFileSet}.
-     * @param dir the resource directory
-     * @param includePatterns the include patterns in comma separated list
-     * @param excludePatterns the exclude patterns in comma separate list
-     * @return the create {@code ZipFileSet}
-     */
-    public static ZipFileSet createZipFileSet(final File dir,
-            final String includePatterns,
-            final String excludePatterns) {
-
-        String includes = includePatterns;
-        if (includePatterns == null) {
-            includes = "";
-        }
-        String excludes = excludePatterns;
-        if (excludePatterns == null) {
-            excludes = "";
-        }
-        ZipFileSet fset = new ZipFileSet();
-        fset.setDir(dir);
-        fset.setIncludes(includes);
-        fset.setExcludes(excludes);
-        fset.setDescription(String.format(
-                "file set: %s ( excludes: [ %s ], includes: [ %s ])",
-                dir.getAbsolutePath(), excludes, includes));
-        return fset;
-    }
-
-    /**
-     * Create a zip file.
-     * @param props Ant project properties
-     * @param log Maven logger
-     * @param duplicate behavior for duplicate file, one of "add", "preserve"
-     * or "fail"
-     * @param fsets list of {@code ZipFileSet} that describe the resources to
-     * zip
-     * @param target the {@code File} instance for the zip file to create
-     * @param timestamp optional reproducible build timestamp
-     * @return the target file
-     */
-    public static File createZip(final Properties props,
-            final Log log,
-            final String duplicate,
-            final List<ZipFileSet> fsets,
-            final File target,
-            final Optional<Instant> timestamp) {
-
-        ZipHelper.getInstance().zip(props, log, duplicate, fsets, target, timestamp);
-        return target;
+        return Collections.emptyList();
     }
 }

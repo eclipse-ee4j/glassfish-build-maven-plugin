@@ -26,9 +26,11 @@ import org.apache.maven.model.Model;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 
 import static org.glassfish.build.utils.MavenHelper.createArtifact;
@@ -42,6 +44,9 @@ import static org.glassfish.build.utils.MavenHelper.readModel;
 @Mojo(name = "attach-all-artifacts",
       requiresOnline = true)
 public final class AttachAllArtifactsMojo extends AbstractMojo {
+
+    @Component
+    private MavenProjectHelper projectHelper;
 
     /**
      * The maven project.
@@ -116,8 +121,8 @@ public final class AttachAllArtifactsMojo extends AbstractMojo {
         // set model
         project.setFile(pomFile);
 
-        for (Object attachedArtifact : attachedArtifacts) {
-            project.addAttachedArtifact((Artifact) attachedArtifact);
+        for (Artifact attachedArtifact : attachedArtifacts) {
+            projectHelper.attachArtifact(project, attachedArtifact.getFile(), null);
         }
     }
 }
