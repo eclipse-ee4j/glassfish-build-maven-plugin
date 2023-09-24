@@ -90,6 +90,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
+                    <version>3.0.0</version>
                     <configuration>
                         <mavenExecutorId>forked-path</mavenExecutorId>
                         <useReleaseProfile>false</useReleaseProfile>
@@ -160,11 +161,6 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.1.2</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.eclipse.sisu</groupId>
-                    <artifactId>sisu-maven-plugin</artifactId>
-                    <version>0.3.5</version>
                 </plugin>
             </plugins>
         </pluginManagement>
