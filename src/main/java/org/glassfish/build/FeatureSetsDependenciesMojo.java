@@ -60,6 +60,7 @@ import org.eclipse.aether.resolution.ArtifactResult;
 @Mojo(
     name = "featuresets-dependencies",
     requiresProject = true,
+    threadSafe = true,
     requiresDependencyResolution = ResolutionScope.COMPILE,
     defaultPhase = LifecyclePhase.PROCESS_RESOURCES)
 public final class FeatureSetsDependenciesMojo extends AbstractMojo {
