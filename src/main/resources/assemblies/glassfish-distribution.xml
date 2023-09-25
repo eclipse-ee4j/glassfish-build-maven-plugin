@@ -24,7 +24,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>${gfbuild-maven-plugin.assemblyInputDirectory}</directory>
+            <directory>${glassfishbuild-maven-plugin.assemblyInputDirectory}</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>**/*</include>

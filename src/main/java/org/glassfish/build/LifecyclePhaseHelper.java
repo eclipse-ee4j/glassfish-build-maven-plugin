@@ -35,7 +35,7 @@ import static org.glassfish.build.xpp3dom.ConfigurationElement.getOrCreateConfig
  */
 final class LifecyclePhaseHelper {
 
-    static final String GFBUILD_ASSEMBLY_DIR = "target/gfbuild-maven-plugin-assembly";
+    static final String GFBUILD_ASSEMBLY_DIR = "target/glassfishbuild-maven-plugin-assembly";
 
     private LifecyclePhaseHelper() {
         // hidden
