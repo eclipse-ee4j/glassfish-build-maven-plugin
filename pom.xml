@@ -141,11 +141,12 @@
                         <scmOnly>true</scmOnly>
                         <baseDirectory>${project.basedir}</baseDirectory>
                         <exclude>
-                            <pattern>/LICENSE</pattern>
-                            <pattern>/CONTRIBUTING.md</pattern>
-                            <pattern>/README.md</pattern>
-                            <pattern>/NOTICE.md</pattern>
-                            <pattern>/javax.annotation.processing.Processor</pattern>
+                            <pattern>LICENSE.md</pattern>
+                            <pattern>CONTRIBUTING.md</pattern>
+                            <pattern>README.md</pattern>
+                            <pattern>NOTICE.md</pattern>
+                            <pattern>.github</pattern>
+                            <pattern>.gitignore</pattern>
                         </exclude>
                     </configuration>
                 </plugin>
