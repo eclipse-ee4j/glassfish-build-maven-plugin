@@ -1,8 +1,10 @@
 target/
 .classpath
 .project
+.externalToolBuilders/
 .settings/
 *.iml
 *nbactions.xml
 .vscode/
 .idea
+

@@ -26,12 +26,13 @@
         <artifactId>project</artifactId>
         <version>1.0.8</version>
     </parent>
+
     <groupId>org.glassfish.build</groupId>
     <artifactId>glassfishbuild-maven-plugin</artifactId>
-    <version>3.3.0-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
-    <name>GlassFishBuild Maven Plugin</name>
+    <version>4.0.0-SNAPSHOT</version>
 
+    <name>GlassFishBuild Maven Plugin</name>
     <url>https://github.com/eclipse-ee4j/glassfish-build-maven-plugin</url>
 
     <issueManagement>
@@ -70,20 +71,26 @@
     <properties>
         <maven.version>3.9.4</maven.version>
         <release.arguments />
-        <project.build.outputTimestamp>2023-04-09T15:29:03Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2023-05-01T00:00:00Z</project.build.outputTimestamp>
     </properties>
 
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
+                    <configuration>
+                        <release>11</release>
+                    </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
+                <plugin>
                     <artifactId>maven-release-plugin</artifactId>
+                    <version>3.0.0</version>
                     <configuration>
                         <mavenExecutorId>forked-path</mavenExecutorId>
                         <useReleaseProfile>false</useReleaseProfile>
@@ -96,25 +103,22 @@
                         <dependency>
                             <groupId>org.apache.maven.scm</groupId>
                             <artifactId>maven-scm-provider-gitexe</artifactId>
-                            <version>1.13.0</version>
+                            <version>2.0.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.6.0</version>
                     <configuration>
-                        <additionalOptions>${javadoc.options}</additionalOptions>
+                        <doclint>none</doclint>
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-plugin-plugin</artifactId>
                     <version>3.9.0</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>3.3.0</version>
                     <configuration>
@@ -124,7 +128,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>10.12.1</version>
+                            <version>10.12.3</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -137,12 +141,19 @@
                         <scmOnly>true</scmOnly>
                         <baseDirectory>${project.basedir}</baseDirectory>
                         <exclude>
-                            <pattern>/LICENSE</pattern>
-                            <pattern>/CONTRIBUTING.md</pattern>
-                            <pattern>/README.md</pattern>
-                            <pattern>/NOTICE.md</pattern>
+                            <pattern>LICENSE.md</pattern>
+                            <pattern>CONTRIBUTING.md</pattern>
+                            <pattern>README.md</pattern>
+                            <pattern>NOTICE.md</pattern>
+                            <pattern>.github</pattern>
+                            <pattern>.gitignore</pattern>
                         </exclude>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.plexus</groupId>
+                    <artifactId>plexus-component-metadata</artifactId>
+                    <version>2.1.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-invoker-plugin</artifactId>
@@ -156,21 +167,12 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <release>11</release>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
                 <configuration>
                     <goalPrefix>glassfishbuild</goalPrefix>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <executions>
                     <execution>
@@ -196,6 +198,18 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-component-metadata</artifactId>
+                <executions>
+                    <execution>
+                        <id>process-annotations</id>
+                        <goals>
+                            <goal>generate-metadata</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-invoker-plugin</artifactId>
                 <executions>
                     <execution>
@@ -217,12 +231,6 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
-            <version>3.9.4</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model-builder</artifactId>
             <version>${maven.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -230,40 +238,31 @@
             <groupId>org.apache.maven.plugin-tools</groupId>
             <artifactId>maven-plugin-annotations</artifactId>
             <version>3.9.0</version>
+            <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-archiver</artifactId>
             <version>3.6.1</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant</artifactId>
-            <version>1.10.14</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.maven.shared</groupId>
-            <artifactId>maven-common-artifact-filters</artifactId>
-            <version>3.3.2</version>
+            <artifactId>maven-shared-utils</artifactId>
+            <version>3.4.2</version>
         </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.10.0</version>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.9.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>2.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>javadoc-jdk8+</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <properties>
-                <javadoc.options>-Xdoclint:none</javadoc.options>
-            </properties>
-        </profile>
-    </profiles>
 </project>
