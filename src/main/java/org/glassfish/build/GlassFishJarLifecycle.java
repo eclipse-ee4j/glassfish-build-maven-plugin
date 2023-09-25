@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping;
-import org.apache.maven.lifecycle.mapping.Lifecycle;
 import org.apache.maven.lifecycle.mapping.LifecycleMapping;
 import org.apache.maven.lifecycle.mapping.LifecyclePhase;
 import org.codehaus.plexus.component.annotations.Component;
@@ -36,15 +35,7 @@ public class GlassFishJarLifecycle extends DefaultLifecycleMapping {
      * Creates the configured instance.
      */
     public GlassFishJarLifecycle() {
-        super(List.of(createLifecycle()));
-    }
-
-
-    private static Lifecycle createLifecycle() {
-        Lifecycle lifecycle = new Lifecycle();
-        lifecycle.setId("default");
-        lifecycle.setLifecyclePhases(createPhases());
-        return lifecycle;
+        super(List.of(LifecyclePhaseHelper.createLifecycle(GlassFishJarLifecycle::createPhases)));
     }
 
 

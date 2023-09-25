@@ -19,19 +19,19 @@ package org.glassfish.build.xpp3dom;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
 /**
- *  The <code>descriptorRef</code> element group, used to configure the assembly-maven-plugin.
+ *  The <code>descriptors</code> element group, used to configure the assembly-maven-plugin.
  */
-public class AssemblyDescriptorIdElements extends Xpp3Dom {
+public class AssemblyDescriptorElements extends Xpp3Dom {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * @param descriptorIds
+     * @param descriptors
      */
-    public AssemblyDescriptorIdElements(final String... descriptorIds) {
-        super("descriptorRefs");
-        for (final String descriptorId : descriptorIds) {
-            addChild(new PropertyElement("descriptorRef", descriptorId));
+    public AssemblyDescriptorElements(final String... descriptors) {
+        super("descriptors");
+        for (final String descriptor : descriptors) {
+            addChild(new PropertyElement("descriptor", descriptor));
         }
     }
 }
