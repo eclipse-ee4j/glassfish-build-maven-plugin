@@ -68,6 +68,10 @@
       <tag>HEAD</tag>
     </scm>
 
+    <prerequisites>
+        <maven>3.9.0</maven>
+    </prerequisites>
+
     <properties>
         <maven.version>3.9.4</maven.version>
         <release.arguments />
