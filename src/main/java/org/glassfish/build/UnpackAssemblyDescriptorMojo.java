@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Eclipse Foundation and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, 2024 Eclipse Foundation and/or its affiliates. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0, which is available at
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -58,7 +59,7 @@ public final class UnpackAssemblyDescriptorMojo extends AbstractMojo {
         final File target = new File(outputDirectory, descriptorResource);
         getLog().debug("Unpacking " + descriptorResource + " to " + target.getAbsolutePath());
         try {
-            Files.copy(source, target.toPath());
+            Files.copy(source, target.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
             throw new MojoExecutionException("Failed to copy into " + target.getAbsolutePath(), e);
         }
