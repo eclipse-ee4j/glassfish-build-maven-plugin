@@ -49,8 +49,15 @@ public final class CopyFileMojo extends AbstractMojo {
     @Parameter(property = PROPERTY_PREFIX + "overwrite", defaultValue = "true")
     private boolean overwrite;
 
+    @Parameter(property = PROPERTY_PREFIX + "skip", defaultValue = "false")
+    private boolean skip;
+
     @Override
     public void execute() throws MojoExecutionException {
+        if (skip) {
+            getLog().info("Goal is skipped");
+            return;
+        }
         if (sourceFile == null) {
             sourceFile = project.getArtifact().getFile();
             if (sourceFile == null) {
