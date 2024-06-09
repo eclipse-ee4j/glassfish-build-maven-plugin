@@ -19,6 +19,7 @@ package org.glassfish.build;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -45,6 +46,9 @@ public final class CopyFileMojo extends AbstractMojo {
     @Parameter(property = PROPERTY_PREFIX + "destFile")
     private File destFile;
 
+    @Parameter(property = PROPERTY_PREFIX + "overwrite", defaultValue = "true")
+    private boolean overwrite;
+
     @Override
     public void execute() throws MojoExecutionException {
         if (sourceFile == null) {
@@ -57,8 +61,12 @@ public final class CopyFileMojo extends AbstractMojo {
         }
         try {
             Files.createDirectories(destFile.getParentFile().toPath());
-            getLog().debug("Copying " + sourceFile + " to " + destFile);
-            Files.copy(sourceFile.toPath(), destFile.toPath());
+            getLog().info("Copying " + sourceFile + " to " + destFile);
+            if (overwrite) {
+                Files.copy(sourceFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                Files.copy(sourceFile.toPath(), destFile.toPath());
+            }
         } catch (IOException ex) {
             throw new MojoExecutionException("Failed to copy " + sourceFile + " to " + destFile, ex);
         }

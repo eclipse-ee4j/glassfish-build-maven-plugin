@@ -226,6 +226,8 @@
                 </executions>
                 <configuration>
                     <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+                    <skipInstallation>${skipTests}</skipInstallation>
+                    <skipInvocation>${skipTests}</skipInvocation>
                 </configuration>
             </plugin>
         </plugins>
