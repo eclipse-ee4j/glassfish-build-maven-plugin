@@ -66,6 +66,9 @@ public final class CopyFileMojo extends AbstractMojo {
                                 + " or specify the 'sourceFile' parameter");
             }
         }
+        if (destFile == null) {
+            throw new MojoExecutionException("The destFile parameter is not set but is required");
+        }
         try {
             Files.createDirectories(destFile.getParentFile().toPath());
             getLog().info("Copying " + sourceFile + " to " + destFile);
