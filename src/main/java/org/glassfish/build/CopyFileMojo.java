@@ -27,7 +27,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Echo a message.
+ * Copy a file or the main artifact to a location.
  */
 @Mojo(name = "copy-file", threadSafe = true)
 public final class CopyFileMojo extends AbstractMojo {
@@ -43,12 +43,21 @@ public final class CopyFileMojo extends AbstractMojo {
     @Parameter(property = PROPERTY_PREFIX + "sourceFile")
     private File sourceFile;
 
+    /**
+     * Destination location of the copied file. Required, unless {@code skip=true}.
+     */
     @Parameter(property = PROPERTY_PREFIX + "destFile")
     private File destFile;
 
+    /**
+     * If {@code true}, overwrite a file if it exists in the destFile location. Otherwise give an error.
+     */
     @Parameter(property = PROPERTY_PREFIX + "overwrite", defaultValue = "true")
     private boolean overwrite;
 
+    /**
+     * Skip goal execution.
+     */
     @Parameter(property = PROPERTY_PREFIX + "skip", defaultValue = "false")
     private boolean skip;
 
@@ -71,7 +80,7 @@ public final class CopyFileMojo extends AbstractMojo {
         }
         try {
             Files.createDirectories(destFile.getParentFile().toPath());
-            getLog().info("Copying " + sourceFile + " to " + destFile);
+            getLog().info("Copying " + sourceFile.getCanonicalPath() + " to " + destFile.getCanonicalPath());
             if (overwrite) {
                 Files.copy(sourceFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } else {
