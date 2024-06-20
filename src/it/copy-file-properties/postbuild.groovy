@@ -14,14 +14,9 @@
     SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 */
 import java.nio.file.Path;
-import java.nio.file.Files;
-
-def buildLog() {
-    Files.readString(basedir.toPath().resolve('build.log'))
-}
 
 Path outputFile = basedir.toPath().resolve("target").resolve("outputfile")
 
-assert outputFile.toFile().exists(): "The file " + outputFile + " does not exist. Build log: " + buildLog()
+assert outputFile.toFile().exists(): "The file " + outputFile + " does not exist."
 
 true
