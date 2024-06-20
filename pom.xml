@@ -76,6 +76,7 @@
         <maven.version>3.9.8</maven.version>
         <release.arguments />
         <project.build.outputTimestamp>2024-02-05T09:15:37Z</project.build.outputTimestamp>
+        <invoker.streamLogsOnFailures>true</invoker.streamLogsOnFailures>
     </properties>
 
     <build>
@@ -226,6 +227,8 @@
                 </executions>
                 <configuration>
                     <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+                    <skipInstallation>${skipTests}</skipInstallation>
+                    <skipInvocation>${skipTests}</skipInvocation>
                 </configuration>
             </plugin>
         </plugins>

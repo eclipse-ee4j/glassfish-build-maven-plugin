@@ -68,7 +68,7 @@ public final class FeatureSetsDependenciesMojo extends AbstractMojo {
     /**
      * Parameters property prefix.
      */
-    private static final String PROPERTY_PREFIX = "gfbuild.featuresets.dependencies.";
+    private static final String PROPERTY_PREFIX = Constants.PROPERTY_PREFIX + "featuresets.dependencies.";
 
     /**
      * The entry point to Aether.
