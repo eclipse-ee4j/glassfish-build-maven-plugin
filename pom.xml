@@ -73,7 +73,7 @@
     </prerequisites>
 
     <properties>
-        <maven.version>3.9.9</maven.version>
+        <maven.version>3.9.11</maven.version>
         <release.arguments />
         <project.build.outputTimestamp>2024-02-05T09:15:37Z</project.build.outputTimestamp>
         <invoker.streamLogsOnFailures>true</invoker.streamLogsOnFailures>
@@ -242,11 +242,11 @@
             <version>4.10.0</version>
         </dependency>
 
-        <!-- 4.0.0 is not compatible with Maven 3.9.x -->
+        <!-- 4.x is not compatible with Maven 3.9.x -->
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>4.0.2</version>
+            <version>3.5.1</version>
         </dependency>
 
         <!-- Two older conflicting transitive versions -->
