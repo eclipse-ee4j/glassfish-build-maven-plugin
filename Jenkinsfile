@@ -36,7 +36,6 @@ pipeline {
       }
       steps {
         sh 'mvn clean install -Pstaging'
-        junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
       }
     }
   }
