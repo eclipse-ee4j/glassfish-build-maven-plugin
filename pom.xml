@@ -73,7 +73,7 @@
     </prerequisites>
 
     <properties>
-        <maven.version>3.9.11</maven.version>
+        <maven.version>3.9.12</maven.version>
         <release.arguments />
         <project.build.outputTimestamp>2024-02-05T09:15:37Z</project.build.outputTimestamp>
         <invoker.streamLogsOnFailures>true</invoker.streamLogsOnFailures>
