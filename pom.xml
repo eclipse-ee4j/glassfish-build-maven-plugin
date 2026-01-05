@@ -33,6 +33,9 @@
     <version>4.1.1-SNAPSHOT</version>
 
     <name>GlassFishBuild Maven Plugin</name>
+    <description>
+        GlassFish Build Maven Plugin contains goals that help with Eclipse GlassFish build.
+    </description>
     <url>https://github.com/eclipse-ee4j/glassfish-build-maven-plugin</url>
 
     <issueManagement>
@@ -62,10 +65,10 @@
     </licenses>
 
     <scm>
-      <connection>scm:git:git://github.com/eclipse-ee4j/glassfish-build-maven-plugin.git</connection>
-      <developerConnection>scm:git:git://github.com/eclipse-ee4j/glassfish-build-maven-plugin.git</developerConnection>
-      <url>https://github.com/eclipse-ee4j/glassfish-build-maven-plugin</url>
-      <tag>HEAD</tag>
+        <connection>scm:git:git://github.com/eclipse-ee4j/glassfish-build-maven-plugin.git</connection>
+        <developerConnection>scm:git:git://github.com/eclipse-ee4j/glassfish-build-maven-plugin.git</developerConnection>
+        <url>https://github.com/eclipse-ee4j/glassfish-build-maven-plugin</url>
+        <tag>HEAD</tag>
     </scm>
 
     <prerequisites>
@@ -167,6 +170,11 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.5.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.21.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -276,4 +284,14 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+    
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-report-plugin</artifactId>
+                <version>3.15.1</version>
+            </plugin>
+        </plugins>
+    </reporting>    
 </project>
